@@ -15,7 +15,7 @@ object Main {
         f ⇒ mv ⇒ implicitly[Monad[Vector]].flatMap(f(_: A).v)(mv.v)
 
       override def point[A]: (A) ⇒ MyVector[A] =
-        a ⇒ implicitly[Monad[Vector]].point(a)
+        a ⇒ implicitly[Bind[Vector]] point a
 }
 
   def main(args: Array[String]): Unit = {
