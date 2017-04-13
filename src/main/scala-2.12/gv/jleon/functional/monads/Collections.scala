@@ -1,36 +1,22 @@
 package gv.jleon.functional
 package monads
 
-//import language.higherKinds
-//import collection.{ GenTraversable }
-//import collection.generic.{ CanBuildFrom, GenericCompanion }
+import language.higherKinds
+import collection.{GenTraversable, mutable}
+import collection.generic.{GenericCompanion, CanBuildFrom}
 
 trait Collections {
   import gv.jleon.functional.{ MonadOps ⇒ _ }
 
-//  final implicit def collectionMonad[S[T] <: GenTraversable[T], A, B](
-//      implicit
-//      companion: GenericCompanion[S],
-//      cbf: CanBuildFrom[GenTraversable[A], B, S[B]]
-//  ): Monad[S] =
-//    new Monad[S] {
-//
-//      override def flatMap[A, B]: (A ⇒ S[B]) ⇒ S[A] ⇒ S[B] =
-//        f ⇒ col ⇒ col.flatMap[A, S[B]](f)
-//
-//      override def point[A]: (A) ⇒ S[A] =
-//        a ⇒ companion(a)
-//    }
+  final implicit def canBuildFromWithCompanion[S[T] <: GenTraversable[T], A, B](implicit companion: GenericCompanion[S]): CanBuildFrom[GenTraversable[A], B, S[B]] =
+    new CanBuildFrom[GenTraversable[A], B, S[B]] {
+      override def apply(from: GenTraversable[A]): mutable.Builder[B, S[B]] = companion.newBuilder
+      override def apply(): mutable.Builder[B, S[B]] = companion.newBuilder
+    }
 
-  final implicit case object VectorMonad extends Monad[Vector] {
-    override def point[A]: A ⇒ Vector[A] = Vector(_)
-    override def flatMap[A, B]: (A ⇒ Vector[B]) ⇒ Vector[A] ⇒ Vector[B] =
-      f ⇒ _ flatMap f
-  }
-
-  final implicit case object SetMonad extends Monad[Set] {
-    override def point[A]: A ⇒ Set[A] = Set(_)
-    override def flatMap[A, B]: (A ⇒ Set[B]) ⇒ Set[A] ⇒ Set[B] =
-      f ⇒ _ flatMap f
-  }
+  final implicit def traversableMonad[S[T] <: GenTraversable[T]](implicit companion: GenericCompanion[S]): Monad[S] =
+    new Monad[S] {
+      override def flatMap[A, B]: (A ⇒ S[B]) ⇒ S[A] ⇒ S[B] = f ⇒ _ flatMap f
+      override def point[A]: A ⇒ S[A] = companion(_)
+    }
 }
