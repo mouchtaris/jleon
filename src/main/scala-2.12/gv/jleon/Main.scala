@@ -16,7 +16,7 @@ object Main {
 
       override def point[A]: (A) ⇒ MyVector[A] =
         a ⇒ implicitly[Bind[Vector]] point a
-}
+    }
 
   def main(args: Array[String]): Unit = {
     println {
@@ -27,21 +27,9 @@ object Main {
       for {
         a ← MyVector { Vector(12, 13, 14) }
         b ← MyVector { Vector(1, 2, 3) }
-      }
-        yield a + b
+      } yield a + b
     }
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
 

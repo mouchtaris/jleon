@@ -12,7 +12,7 @@ trait Monad[F[_]] extends Any with Applicative[F] with Bind[F] {
 
   final override def apply[A, B]: F[A ⇒ B] ⇒ F[A] ⇒ F[B] =
     ff ⇒ fa ⇒ {
-      val pointmap: (A ⇒ B) ⇒ F[B]  = pointf andThen flatMap[A, B] andThen read(fa)
+      val pointmap: (A ⇒ B) ⇒ F[B] = pointf andThen flatMap[A, B] andThen read(fa)
       flatMap(pointmap)(ff)
     }
 }

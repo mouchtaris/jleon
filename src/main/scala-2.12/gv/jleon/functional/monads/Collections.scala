@@ -2,8 +2,8 @@ package gv.jleon.functional
 package monads
 
 import language.higherKinds
-import collection.{GenTraversable, mutable}
-import collection.generic.{GenericCompanion, CanBuildFrom}
+import collection.{ GenTraversable, mutable }
+import collection.generic.{ GenericCompanion, CanBuildFrom }
 
 trait Collections {
   import gv.jleon.functional.{ MonadOps ⇒ _ }
