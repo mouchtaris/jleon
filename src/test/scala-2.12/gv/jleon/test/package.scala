@@ -8,8 +8,7 @@ import org.scalacheck.{
 }
 
 package object test extends AnyRef
-  with ArbitraryGenerator
-  with UriGenerator
+//  with ArbitraryGenerator
 {
 
   type Prop = scProp

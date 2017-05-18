@@ -3,8 +3,6 @@ package gv.jleon.crypto
 import java.nio.charset.StandardCharsets.{ UTF_8 }
 import java.security.{ MessageDigest }
 
-import scala.language.{ implicitConversions }
-
 trait Digestion extends Any {
   import Digestion.{ toHexString }
 

@@ -1,6 +1,5 @@
 package gv.jleon
 
-import scala.concurrent.Future
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.directives.{ DebuggingDirectives }
