@@ -6,9 +6,8 @@ import test._
 import Prop._
 
 object MirrorProperties extends Properties("Mirror")
-  with MirrorGenerator
-  with UriGenerator
-{
+    with MirrorGenerator
+    with UriGenerator {
 
   import Mirror._
 

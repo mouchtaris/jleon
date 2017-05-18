@@ -5,6 +5,4 @@ import test._
 
 object DigestionProperties extends Properties("Digestion") {
 
-
-
 }

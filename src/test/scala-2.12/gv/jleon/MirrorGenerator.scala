@@ -21,7 +21,6 @@ trait MirrorGenerator extends Any {
     for {
       prefix ← arbitrary[Prefix]
       baseUrl ← arbitrary[BaseUrl]
-    }
-      yield Mirror(baseUrl :: prefix :: HNil)
+    } yield Mirror(baseUrl :: prefix :: HNil)
   )
 }

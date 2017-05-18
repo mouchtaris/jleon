@@ -7,8 +7,7 @@ import org.scalacheck.{
   Gen ⇒ scGen
 }
 
-package object test extends AnyRef
-//  with ArbitraryGenerator
+package object test extends AnyRef //  with ArbitraryGenerator
 {
 
   type Prop = scProp

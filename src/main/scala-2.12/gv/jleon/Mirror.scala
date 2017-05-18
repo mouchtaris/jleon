@@ -9,8 +9,8 @@ import gv.jleon.`type`.{ TaggedType }
 import Mirror._
 
 final case class Mirror(
-  baseUrl: BaseUrl,
-  prefix: Prefix
+    baseUrl: BaseUrl,
+    prefix:  Prefix
 ) {
   def urlFor(path: Uri.Path): Uri = baseUrl.withPath(baseUrl.path ++ path)
 }
@@ -42,7 +42,7 @@ object Mirror {
     val i: Interpretation[T] = implicitly
     Mirror(
       baseUrl = i baseUrl self,
-      prefix = i prefix self
+      prefix  = i prefix self
     )
   }
 
