@@ -38,8 +38,8 @@ object Experimental {
       "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.4",
       "com.typesafe.akka" %% "akka-http-jackson" % "10.0.4",
       "com.typesafe.akka" %% "akka-http-xml" % "10.0.4"
-    ),
+    )
 
-    initialCommands in (Test, console) := """ammonite.Main().run()"""
+    //initialCommands in (Test, console) := """ammonite.Main().run()"""
   )
 }
