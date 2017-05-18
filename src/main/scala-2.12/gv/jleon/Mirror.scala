@@ -2,7 +2,7 @@ package gv.jleon
 
 import scala.language.{ implicitConversions }
 
-import shapeless.{ HList, HNil, :: }
+import shapeless.{ HList, :: }
 
 import gv.jleon.`type`.{ TaggedType }
 
@@ -29,6 +29,14 @@ object Mirror {
     def prefix(self: T): Prefix
   }
 
+  final implicit def apply[T: Interpretation](self: T): Mirror = {
+    val i: Interpretation[T] = implicitly
+    Mirror(
+      baseUrl = i baseUrl self,
+      prefix  = i prefix self
+    )
+  }
+
   final implicit def recordI[Rest <: HList] = new Interpretation[BaseUrl :: Prefix :: Rest] {
     override def baseUrl(self: Self): BaseUrl = self match {
       case u :: _ ⇒ u
@@ -36,14 +44,6 @@ object Mirror {
     override def prefix(self: Self): Prefix = self match {
       case _ :: p :: _ ⇒ p
     }
-  }
-
-  final implicit def apply[T: Interpretation](self: T): Mirror = {
-    val i: Interpretation[T] = implicitly
-    Mirror(
-      baseUrl = i baseUrl self,
-      prefix  = i prefix self
-    )
   }
 
 }

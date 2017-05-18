@@ -1,32 +1,50 @@
-package gv.jleon.crypto
+package gv.jleon
+package crypto
 
-import java.nio.charset.StandardCharsets.{ UTF_8 }
-import java.security.{ MessageDigest }
+import java.nio.charset.StandardCharsets.UTF_8
+import java.security.MessageDigest
 
-trait Digestion extends Any {
+import scala.language.{ implicitConversions }
+
+import `type`.{ TaggedType }
+
+import Digestion._
+
+final case class Digestion(
+    digest: DigestFunc.t
+) {
   import Digestion.{ toHexString }
 
-  def digest(bytes: Array[Byte]): Array[Byte]
+  def digest(string: String): Bytes = digest(string getBytes UTF_8)
 
-  def digest(string: String): Array[Byte] = digest(string getBytes UTF_8)
-
-  def hexDigest(bytes: Array[Byte]): String = toHexString(digest(bytes))
+  def hexDigest(bytes: Bytes): String = toHexString(digest(bytes))
 
   def hexDigest(string: String): String = toHexString(digest(string))
 }
 
 object Digestion {
 
-  def toHexString(bytes: Array[Byte]): String =
+  type Bytes = Array[Byte]
+  final implicit object DigestFunc extends TaggedType[Bytes ⇒ Bytes]
+
+  def toHexString(bytes: Bytes): String =
     BigInt(1, bytes).toString(0x10)
 
-  final case class create(
-      create: () ⇒ MessageDigest
-  ) extends Digestion {
-    override def digest(bytes: Array[Byte]): Array[Byte] = create().digest(bytes)
+  trait Interpretation[T] extends Any {
+    def digest(self: T): DigestFunc.t
   }
 
-  final val SHA512: Digestion =
-    create(() ⇒ MessageDigest getInstance "SHA-512")
+  final implicit def apply[T: Interpretation](self: T): Digestion = {
+    val i: Interpretation[T] = implicitly
+    Digestion(
+      digest = i digest self
+    )
+  }
+
+  final implicit object MessageDigestConstructorInterpretation extends Interpretation[() ⇒ MessageDigest] {
+    override def digest(self: () ⇒ MessageDigest): DigestFunc.t = self().digest(_)
+  }
+
+  final val SHA512: Digestion = Digestion(() ⇒ MessageDigest getInstance "SHA-512")
 
 }
