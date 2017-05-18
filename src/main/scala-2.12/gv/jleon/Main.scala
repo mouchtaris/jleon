@@ -3,6 +3,18 @@ package jleon
 
 import functional._
 
+object leon {
+  import java.net.URI
+  import java.nio.channels.{ Channels, ReadableByteChannel }
+  import java.nio.file.{ Files, Paths, Path }
+  import scala.concurrent.{ Future, Promise, ExecutionContext }
+  import scala.language.implicitConversions
+  import scala.collection.concurrent.TrieMap
+  import scala.util.control.{ Exception }
+  import scala.util.Try
+  import java.security.MessageDigest
+}
+
 object Main {
 
   final implicit class MyVector[T](val v: Vector[T]) extends AnyVal {
@@ -29,6 +41,8 @@ object Main {
         b ← MyVector { Vector(1, 2, 3) }
       } yield a + b
     }
+
+    println(crypto.Digestion.SHA512.digest("lol"))
   }
 
 }

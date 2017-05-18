@@ -1,8 +1,8 @@
 lazy val Jleon = (project in file("."))
   .enablePlugins(
-    AshScriptPlugin,
-    DockerPlugin,
-    JavaAppPackaging,
+//    AshScriptPlugin,
+//    DockerPlugin,
+//    JavaAppPackaging,
     SbtScalariform
 //    ScalaNativePlugin
   )
@@ -10,7 +10,7 @@ lazy val Jleon = (project in file("."))
     organization := "good-vibez",
     name := "jleon",
     version := "0.0.1",
-    scalaVersion := "2.12.1"
+    scalaVersion := "2.12.2"
   )
   .settings(
     // Extra project settings

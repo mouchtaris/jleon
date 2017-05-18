@@ -6,7 +6,7 @@ object Experimental {
   lazy val ProjectSettings = Seq(
 
     libraryDependencies ++= Seq(
-      "com.lihaoyi" % "ammonite" % "0.8.2" % "test" cross CrossVersion.full,
+//      "com.lihaoyi" % "ammonite" % "0.8.2" % "test" cross CrossVersion.full,
       "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "org.scalaz" %% "scalaz-core" % "7.2.9",
