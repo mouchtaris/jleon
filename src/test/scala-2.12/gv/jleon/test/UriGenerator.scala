@@ -24,30 +24,30 @@ import UriGenerator._
 
 trait UriGenerator extends Any {
 
-  final implicit def schemeGenerator: Arbitrary[Scheme] = Arbitrary(
+  private[this] final implicit def schemeGenerator: Arbitrary[Scheme] = Arbitrary(
     Gen
       .oneOf("http", "https", "ftp", "ftps", "scp", "ssh", "git")
       .withFilter(_.nonEmpty)
       .map(Scheme.apply)
   )
 
-  final implicit def hostGenerator: Arbitrary[Host] = Arbitrary(
+  private[this] final implicit def hostGenerator: Arbitrary[Host] = Arbitrary(
     Gen.alphaStr.map(Host.apply)
   )
 
-  final implicit def extGenerator: Arbitrary[Ext] = Arbitrary(
+  private[this] final implicit def extGenerator: Arbitrary[Ext] = Arbitrary(
     Gen.alphaStr.map(Ext.apply)
   )
 
-  final implicit def pathSegmentGenerator: Arbitrary[Path.Slash] = Arbitrary(
+  private[this] final implicit def pathSegmentGenerator: Arbitrary[Path.Slash] = Arbitrary(
     Gen.alphaStr.withFilter(_.nonEmpty).map(s ⇒ Path.Slash(s :: Path.Empty))
   )
 
-  final implicit def pathGenerator: Arbitrary[Path] = Arbitrary(
+  final implicit def akkaUriPathGenerator: Arbitrary[Path] = Arbitrary(
     Gen.listOf(pathSegmentGenerator.arbitrary).map(_.fold(Path./)(_ ++ _))
   )
 
-  final implicit def uriStringGenerator: Arbitrary[UriString] = Arbitrary(
+  private[this] final implicit def uriStringGenerator: Arbitrary[UriString] = Arbitrary(
     for {
       scheme ← arbitrary[Scheme]
       host ← arbitrary[Host]

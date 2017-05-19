@@ -7,15 +7,15 @@ import scala.language.{ implicitConversions }
 import shapeless.{ HNil, :: }
 
 import gv.jleon.{ Path ⇒ jPath }
+
 import `type`.{ TaggedType }
+
 import crypto.Digestion.SHA512
 
-import Storage._
-
 final case class Storage(
-    basePath: Path.t
+    basePath: Storage.Path.t
 ) {
-  private[this] def storagePath(uri: Uri): Path.t =
+  def storagePath(uri: Uri): Storage.Path.t =
     basePath resolve SHA512.hexDigest(uri.toString)
 
   def fetch(uri: Uri): Try[ReadableByteChannel] =
