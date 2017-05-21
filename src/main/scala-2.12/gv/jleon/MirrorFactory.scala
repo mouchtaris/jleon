@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 
 import shapeless.{ HNil, :: }
 
-import Config.{ RichConfigValue }
+import config.{ RichConfigValue }
 
 object MirrorFactory {
 
@@ -18,12 +18,12 @@ object MirrorFactory {
    *
    * @param self root ("mirrors") mirrors config
    */
-  final implicit class MirrorsConfig(val self: Config.tsConfigObject) extends AnyVal {
-    def entries: Traversable[(String, Config.tsConfig)] =
+  final implicit class MirrorsConfig(val self: config.tsConfigObject) extends AnyVal {
+    def entries: Traversable[(String, config.tsConfig)] =
       self.asScala
         .map {
           case (name, value) ⇒
-            value.asConfig.map { config ⇒ (name, config) }
+            value.asConfig.map { conf ⇒ (name, conf) }
         }
         .collect { case Some(p) ⇒ p }
   }
@@ -33,9 +33,9 @@ object MirrorFactory {
    *
    * @param self an entry under "mirrors"
    */
-  final implicit class MirrorConfig(val self: Config.tsConfig) extends AnyVal {
+  final implicit class MirrorConfig(val self: config.tsConfig) extends AnyVal {
     @inline def fetchStrategy: String = self getString key.FetchStrategy
-    @inline def mirrors: Config.tsConfigObject = self getObject key.Mirrors
+    @inline def mirrors: config.tsConfigObject = self getObject key.Mirrors
   }
 }
 
@@ -46,7 +46,6 @@ trait MirrorFactory extends Any {
   private[this] def fetchStrategy(
     implicit
     config:          MirrorConfig,
-    prefix:          Mirror.Prefix,
     fetchRepository: FetchRepository
   ): Option[Fetch] =
     fetchRepository(config.self getString key.FetchStrategy)

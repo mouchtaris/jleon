@@ -1,4 +1,5 @@
 package gv.jleon
+package util
 
 import java.{ net ⇒ jnet }
 
@@ -30,5 +31,3 @@ trait stdconv {
    */
   type Implicitly[T] = T
 }
-
-object stdconv extends stdconv

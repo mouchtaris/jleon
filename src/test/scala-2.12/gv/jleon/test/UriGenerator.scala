@@ -3,7 +3,7 @@ package test
 
 import java.net.URI
 
-import akka.http.scaladsl.model.Uri.Path
+import Uri.{ Path ⇒ AkkaPath }
 
 import `type`.TaggedType
 
@@ -39,12 +39,12 @@ trait UriGenerator extends Any {
     Gen.alphaStr.map(Ext.apply)
   )
 
-  private[this] final implicit def pathSegmentGenerator: Arbitrary[Path.Slash] = Arbitrary(
-    Gen.alphaStr.withFilter(_.nonEmpty).map(s ⇒ Path.Slash(s :: Path.Empty))
+  private[this] final implicit def pathSegmentGenerator: Arbitrary[AkkaPath.Slash] = Arbitrary(
+    Gen.alphaStr.withFilter(_.nonEmpty).map(s ⇒ AkkaPath.Slash(s :: AkkaPath.Empty))
   )
 
-  final implicit def akkaUriPathGenerator: Arbitrary[Path] = Arbitrary(
-    Gen.listOf(pathSegmentGenerator.arbitrary).map(_.fold(Path./)(_ ++ _))
+  final implicit def akkaUriPathGenerator: Arbitrary[AkkaPath] = Arbitrary(
+    Gen.listOf(pathSegmentGenerator.arbitrary).map(_.fold(AkkaPath./)(_ ++ _))
   )
 
   private[this] final implicit def uriStringGenerator: Arbitrary[UriString] = Arbitrary(
@@ -52,7 +52,7 @@ trait UriGenerator extends Any {
       scheme ← arbitrary[Scheme]
       host ← arbitrary[Host]
       ext ← arbitrary[Ext]
-      path ← arbitrary[Path]
+      path ← arbitrary[AkkaPath]
     } yield s"$scheme://$host.$ext$path"
   )
 
