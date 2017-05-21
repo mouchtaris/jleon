@@ -1,7 +1,7 @@
 package gv.jleon
 package storage
 
-import shapeless.{ HNil, :: }
+import shapeless.{ HNil }
 
 object StorageFactory {
 

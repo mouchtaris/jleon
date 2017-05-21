@@ -3,8 +3,8 @@ package facade
 
 trait JLeonImports {
 
-  type Mirror = mirror.Mirror
-  val Mirror = mirror.Mirror
+  type Mirror = domain.Mirror
+  val Mirror = domain.Mirror
 
   type Storage = storage.Storage
   val Storage = storage.Storage

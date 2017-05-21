@@ -1,5 +1,5 @@
 package gv.jleon
-package mirror
+package domain
 
 trait MirrorImports extends Any {
 

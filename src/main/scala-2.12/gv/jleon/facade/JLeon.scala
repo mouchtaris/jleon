@@ -2,8 +2,8 @@ package gv.jleon
 package facade
 
 import akka.actor.{ ActorSystem }
-import akka.stream.{ Materializer, ActorMaterializer }
-import akka.http.scaladsl.{ Http ⇒ AkkaHttp, HttpExt }
+import akka.stream.{ Materializer }
+import akka.http.scaladsl.{ HttpExt }
 
 import shapeless.{ HNil, :: }
 
@@ -21,7 +21,7 @@ final class JLeon()(
   implicit val fetchStrategyRepository: FetchRepository = createFetchStrategyRepository
 
   val mirrors: Map[Mirror.Prefix, Vector[Mirror :: Fetch :: HNil]] = {
-    implicit val mirrorConfig: mirror.MirrorsConfig = config.mirrors
+    implicit val mirrorConfig: MirrorsConfig = config.mirrors
     Mirror.fromConfig
   }
 
