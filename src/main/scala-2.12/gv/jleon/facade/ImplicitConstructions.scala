@@ -16,7 +16,7 @@ protected[facade] trait ImplicitConstructions extends Any {
   protected[this] final def createAkkaHttpFetchStrategy(implicit http: HttpExt, mat: Materializer): AkkaHttpFetch =
     AkkaHttpFetch(http, mat)
 
-  protected[this] final def createFetchStrategyRepository(implicit http: HttpExt, mat: Materializer): FetchRepository = Map {
+  protected[this] final def createFetchStrategyRepository(implicit http: HttpExt, mat: Materializer): domain.FetchRepository = Map {
     "akkaHttp" → Fetch(createAkkaHttpFetchStrategy)
   }
 

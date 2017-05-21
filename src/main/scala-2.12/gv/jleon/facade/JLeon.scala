@@ -19,7 +19,7 @@ final class JLeon()(
   implicit val akkaHttpExt: HttpExt = createAkkaHttpExt
   implicit val materializer: Materializer = createAkkaActorMaterializer
 
-  implicit val fetchStrategyRepository: FetchRepository = createFetchStrategyRepository
+  implicit val fetchStrategyRepository: domain.FetchRepository = createFetchStrategyRepository
 
   val mirrors: Map[Mirror.Prefix, Vector[Mirror :: Fetch :: HNil]] = {
     implicit val mirrorConfig: MirrorsConfig = config.mirrors
