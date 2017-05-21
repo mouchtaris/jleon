@@ -41,4 +41,10 @@ package object jleon extends stdconv {
 
   protected[jleon]type Uri = AkkaUri
   protected[jleon] val Uri = AkkaUri
+
+  type Config = Config.Config
+
+  final implicit class FetchRepository(val self: Map[String, Fetch]) extends AnyVal {
+    @inline def apply(s: String): Option[Fetch] = self get s
+  }
 }

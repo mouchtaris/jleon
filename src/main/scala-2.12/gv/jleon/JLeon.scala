@@ -1,20 +1,26 @@
 package gv.jleon
 
-import scala.collection.JavaConverters._
-
 import akka.actor.{ ActorSystem }
+import akka.stream.{ Materializer, ActorMaterializer }
+import akka.http.scaladsl.{ Http ⇒ AkkaHttp, HttpExt }
 
-import com.typesafe.config.{
-  Config ⇒ tsConfig,
-  ConfigFactory
-}
+import shapeless.{ HNil, :: }
 
 final class JLeon()(
-    implicit
-    val actorSystem: ActorSystem  = ActorSystem("JLeon"),
-    val config:      JLeon.Config = ConfigFactory.defaultApplication().getConfig("jleon")
-) {
-  val mirrors: Map[String, Traversable[Mirror]] = JLeon.loadMirrors
+  implicit
+  val actorSystem: ActorSystem = ActorSystem("JLeon"),
+  val config:      Config      = Config("jleon")
+) extends AnyRef
+    with JLeon.ImplicitConstructions {
+  implicit val akkaHttpExt: HttpExt = createAkkaHttpExt
+  implicit val materializer: Materializer = createAkkaActorMaterializer
+
+  implicit val fetchStrategyRepository: FetchRepository = createFetchStrategyRepository
+
+  val mirrors: Map[Mirror.Prefix, Vector[Mirror :: Fetch :: HNil]] = {
+    implicit val mirrorConfig: MirrorFactory.MirrorsConfig = config.mirrors
+    Mirror.fromConfig
+  }
 }
 
 object JLeon {
@@ -24,16 +30,21 @@ object JLeon {
     val all: Traversable[String] = Vector(ARCH)
   }
 
-  final implicit class Config(val self: tsConfig) extends AnyVal {
-    def mirror(prefix: String): Stream[Mirror] =
-      self.getStringList(s"mirror.$prefix").asScala.toStream
-        .map(url ⇒ Mirror(prefix = prefix, baseUrl = Uri(url)))
-  }
+  trait ImplicitConstructions extends Any {
 
-  final def loadMirrors(implicit config: Config): Map[String, Traversable[Mirror]] = {
-    MIRROR_PREFIX.all
-      .map { prefix ⇒ (prefix, config.mirror(prefix)) }
-      .toMap
+    protected[this] final def createAkkaHttpExt(implicit as: ActorSystem): HttpExt =
+      AkkaHttp()
+
+    protected[this] final def createAkkaActorMaterializer(implicit as: ActorSystem): ActorMaterializer =
+      ActorMaterializer()
+
+    protected[this] final def createAkkaHttpFetchStrategy(implicit http: HttpExt, mat: Materializer): AkkaHttpFetch =
+      AkkaHttpFetch(http, mat)
+
+    protected[this] final def createFetchStrategyRepository(implicit http: HttpExt, mat: Materializer): FetchRepository = Map {
+      "akkaHttp" → Fetch(createAkkaHttpFetchStrategy)
+    }
+
   }
 
 }

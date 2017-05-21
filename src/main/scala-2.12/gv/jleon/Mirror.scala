@@ -10,12 +10,13 @@ import Mirror._
 
 final case class Mirror(
     baseUrl: BaseUrl,
-    prefix:  Prefix
+    prefix:  Prefix,
+    name:    String  = ""
 ) {
   def urlFor(path: Uri.Path): Uri = baseUrl.withPath(baseUrl.path ++ path)
 }
 
-object Mirror {
+object Mirror extends MirrorFactory {
 
   final implicit object BaseUrl extends TaggedType[Uri]
   type BaseUrl = BaseUrl.t
@@ -25,23 +26,24 @@ object Mirror {
 
   trait Interpretation[T] extends Any {
     type Self = T
-    def baseUrl(self: T): BaseUrl
-    def prefix(self: T): Prefix
+    def baseUrl(implicit self: T): BaseUrl
+    def prefix(implicit self: T): Prefix
   }
 
   final implicit def apply[T: Interpretation](self: T): Mirror = {
     val i: Interpretation[T] = implicitly
+    implicit val _self = self
     Mirror(
-      baseUrl = i baseUrl self,
-      prefix  = i prefix self
+      baseUrl = i.baseUrl,
+      prefix  = i.prefix
     )
   }
 
   final implicit def recordI[Rest <: HList] = new Interpretation[BaseUrl :: Prefix :: Rest] {
-    override def baseUrl(self: Self): BaseUrl = self match {
+    override def baseUrl(implicit self: Self): BaseUrl = self match {
       case u :: _ ⇒ u
     }
-    override def prefix(self: Self): Prefix = self match {
+    override def prefix(implicit self: Self): Prefix = self match {
       case _ :: p :: _ ⇒ p
     }
   }
