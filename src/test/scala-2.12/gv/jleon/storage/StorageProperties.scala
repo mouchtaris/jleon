@@ -1,4 +1,5 @@
 package gv.jleon
+package storage
 
 import shapeless.{ HNil }
 

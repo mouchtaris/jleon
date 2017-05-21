@@ -24,6 +24,11 @@ final class JLeon()(
     implicit val mirrorConfig: mirror.MirrorsConfig = config.mirrors
     Mirror.fromConfig
   }
+
+  val storage: Storage = {
+    implicit val storageConfig: gv.jleon.storage.StorageConfig = config.storage
+    Storage.fromConfig
+  }
 }
 
 object JLeon {

@@ -9,4 +9,6 @@ protected[config] trait ConfigDecorationOps extends Any {
 
   final def mirrors: tsConfigObject = self getObject s"${config.key.mirrors}"
 
+  final def storage: tsConfig = self getConfig s"${config.key.storage}"
+
 }

@@ -1,4 +1,5 @@
 package gv.jleon
+package storage
 
 import java.nio.file.{ Files, StandardOpenOption }
 
@@ -13,9 +14,9 @@ import `type`.{ TaggedType }
 import crypto.Digestion.SHA512
 
 final case class Storage(
-    basePath: Storage.Path.t
+    basePath: Storage.Path
 ) {
-  def storagePath(uri: Uri): Storage.Path.t =
+  def storagePath(uri: Uri): Storage.Path =
     basePath resolve SHA512.hexDigest(uri.toString)
 
   def fetch(uri: Uri): Try[ReadableByteChannel] =
@@ -30,9 +31,11 @@ final case class Storage(
       .flatten
 }
 
-object Storage {
+object Storage extends AnyRef
+    with StorageFactory {
 
   final implicit object Path extends TaggedType[jPath]
+  final type Path = Path.t
 
   trait Interpretation[T] extends Any {
     final type Self = T
@@ -47,8 +50,8 @@ object Storage {
     )
   }
 
-  final implicit def recordI = new Interpretation[Path.t :: HNil] {
-    override def basePath(self: Self): Path.t = self match {
+  final implicit def recordI = new Interpretation[Path :: HNil] {
+    override def basePath(self: Self): Path = self match {
       case p :: _ ⇒ p
     }
   }

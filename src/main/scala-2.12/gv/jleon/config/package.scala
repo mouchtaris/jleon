@@ -7,6 +7,7 @@ package object config extends AnyRef
 
   protected[config] final object key {
     val mirrors = "mirrors"
+    val storage = "storage"
   }
 
   final object Config {
