@@ -47,4 +47,5 @@ object JLeon {
 
   }
 
+  final def apply(): JLeon = new JLeon()
 }

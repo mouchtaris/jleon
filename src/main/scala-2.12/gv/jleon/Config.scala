@@ -30,7 +30,7 @@ object Config {
         None
 
     def asString: Option[String] = ifType(ConfigValueType.STRING) map (_.asInstanceOf[String])
-    def asConfigObject: Option[tsConfigObject] = ifType(ConfigValueType.OBJECT) map (_.asInstanceOf[tsConfigObject])
+    def asConfigObject: Option[tsConfigObject] = ifType(ConfigValueType.OBJECT) map (_ ⇒ self.asInstanceOf[tsConfigObject])
     def asConfig: Option[tsConfig] = asConfigObject map (_.toConfig)
   }
 
