@@ -1,3 +1,11 @@
 package gv.jleon
 
-final case class Application()
+object Application {
+
+  def main(args: Array[String]): Unit = {
+    //    val conf = ConfigFactory.defaultApplication()
+    //    println { conf.getStringList("leon.mirrors.arch") }
+    //    Http.serve
+  }
+
+}

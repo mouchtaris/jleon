@@ -23,7 +23,7 @@ object StorageProperties extends Properties("Storage")
 
   property("storagePath is under basePath") =
     forAll { (storage: Storage, uri: Uri) ⇒
-      storage.storagePath(uri).toString.startsWith(storage.basePath.toString)
+      storage.storagePath(uri).toString startsWith storage.basePath.toString
     }
 
 }
