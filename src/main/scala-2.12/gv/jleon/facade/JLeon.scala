@@ -15,6 +15,7 @@ final class JLeon()(
   val config:      Config      = Config("jleon")
 ) extends AnyRef
     with ImplicitConstructions {
+
   implicit val akkaHttpExt: HttpExt = createAkkaHttpExt
   implicit val materializer: Materializer = createAkkaActorMaterializer
 
@@ -26,7 +27,7 @@ final class JLeon()(
   }
 
   val storage: Storage = {
-    implicit val storageConfig: gv.jleon.storage.StorageConfig = config.storage
+    implicit val storageConfig: StorageConfig = config.storage
     Storage.fromConfig
   }
 }

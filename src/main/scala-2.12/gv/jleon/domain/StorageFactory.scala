@@ -1,5 +1,5 @@
 package gv.jleon
-package storage
+package domain
 
 import shapeless.{ HNil }
 
@@ -16,6 +16,8 @@ object StorageFactory {
   }
 
 }
+
+import StorageFactory._
 
 trait StorageFactory extends Any {
 

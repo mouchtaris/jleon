@@ -1,5 +1,5 @@
 package gv.jleon
-package storage
+package domain
 
 import java.nio.file.{ Files, StandardOpenOption }
 

@@ -2,7 +2,5 @@ package gv.jleon
 package domain
 
 trait MirrorImports extends Any {
-
-  type MirrorsConfig = MirrorFactory.MirrorsConfig
-
+  final type MirrorsConfig = MirrorFactory.MirrorsConfig
 }

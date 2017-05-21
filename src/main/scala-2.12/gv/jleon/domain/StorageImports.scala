@@ -1,8 +1,6 @@
 package gv.jleon
-package storage
+package domain
 
 trait StorageImports extends Any {
-
   final type StorageConfig = StorageFactory.StorageConfig
-
 }

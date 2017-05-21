@@ -10,6 +10,9 @@ object Application {
     println {
       jleon.mirrors
     }
+    println {
+      jleon.storage
+    }
   }
 
 }
