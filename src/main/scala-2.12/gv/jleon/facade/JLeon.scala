@@ -21,7 +21,7 @@ final class JLeon()(
   implicit val fetchStrategyRepository: FetchRepository = createFetchStrategyRepository
 
   val mirrors: Map[Mirror.Prefix, Vector[Mirror :: Fetch :: HNil]] = {
-    implicit val mirrorConfig: MirrorFactory.MirrorsConfig = config.mirrors
+    implicit val mirrorConfig: mirror.MirrorsConfig = config.mirrors
     Mirror.fromConfig
   }
 }

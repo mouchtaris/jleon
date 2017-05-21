@@ -1,4 +1,5 @@
 package gv.jleon
+package mirror
 
 import scala.language.{ implicitConversions }
 
@@ -6,7 +7,7 @@ import shapeless.{ HList, :: }
 
 import gv.jleon.`type`.{ TaggedType }
 
-import Mirror._
+import Mirror.{ BaseUrl, Prefix }
 
 final case class Mirror(
     baseUrl: BaseUrl,
@@ -16,7 +17,8 @@ final case class Mirror(
   def urlFor(path: Uri.Path): Uri = baseUrl.withPath(baseUrl.path ++ path)
 }
 
-object Mirror extends MirrorFactory {
+object Mirror extends AnyRef
+    with MirrorFactory {
 
   final implicit object BaseUrl extends TaggedType[Uri]
   type BaseUrl = BaseUrl.t
