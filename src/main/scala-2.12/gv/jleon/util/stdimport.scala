@@ -24,8 +24,15 @@ trait stdimport {
     def apply(uri: Uri): Path = this(uri: jnet.URI)
   }
   protected[jleon] object File {
+    val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
+    val WRITE = jfile.StandardOpenOption.WRITE
+
     def exists(p: Path): Boolean = jfile.Files.exists(p)
     def exists(p: String): Boolean = exists(Path(p))
+
+    def createNew(p: Path): Try[ReadableByteChannel] = Try {
+      jfile.Files.newByteChannel(p, CREATE_NEW, WRITE)
+    }
   }
 
   protected[jleon] final def nonFatalCatch[T]: sutil.control.Exception.Catch[T] = sutil.control.Exception.nonFatalCatch

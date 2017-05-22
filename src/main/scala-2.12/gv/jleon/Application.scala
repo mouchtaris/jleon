@@ -13,6 +13,10 @@ object Application {
     println {
       jleon.storage
     }
+    val u = Uri("file:///tmp/a")
+    println {
+      jleon.storage.lock(u)
+    }
   }
 
 }
