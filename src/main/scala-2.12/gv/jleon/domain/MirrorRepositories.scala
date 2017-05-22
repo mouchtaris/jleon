@@ -8,7 +8,7 @@ object MirrorRepositories {
 
   import Mirror.{ Prefix }
 
-  final type Underlying = Map[Prefix, Traversable[Mirror :: Fetch :: HNil]]
+  final type Underlying = Map[Prefix, IndexedSeq[Mirror :: Fetch :: HNil]]
 
   trait Ops extends Any {
     def self: Underlying
