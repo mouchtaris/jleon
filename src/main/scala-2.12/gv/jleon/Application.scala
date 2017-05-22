@@ -16,6 +16,9 @@ object Application {
     val u = Uri("file:///tmp/a")
     println {
       jleon.storage.lock(u)
+        .recoverWith {
+          case _ ⇒ jleon.storage.unlock(u) flatMap (_ ⇒ jleon.storage.lock(u))
+        }
     }
   }
 

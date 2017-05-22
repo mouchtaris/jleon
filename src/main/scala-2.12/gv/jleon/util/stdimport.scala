@@ -33,6 +33,9 @@ trait stdimport {
     def createNew(p: Path): Try[ReadableByteChannel] = Try {
       jfile.Files.newByteChannel(p, CREATE_NEW, WRITE)
     }
+
+    def delete(p: Path): Boolean =
+      jfile.Files.deleteIfExists(p)
   }
 
   protected[jleon] final def nonFatalCatch[T]: sutil.control.Exception.Catch[T] = sutil.control.Exception.nonFatalCatch

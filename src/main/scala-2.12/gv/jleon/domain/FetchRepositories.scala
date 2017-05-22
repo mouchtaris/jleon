@@ -3,7 +3,11 @@ package domain
 
 object FetchRepositories {
 
-  final implicit class FetchRepository(val self: Map[String, Fetch]) extends AnyVal {
+  final type Underlying = Map[String, Fetch]
+
+  trait Ops extends Any {
+    def self: Underlying
+
     @inline def apply(s: String): Option[Fetch] = self get s
   }
 
