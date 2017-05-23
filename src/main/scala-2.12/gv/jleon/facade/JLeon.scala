@@ -5,7 +5,7 @@ import akka.actor.{ ActorSystem }
 import akka.stream.{ Materializer }
 import akka.http.scaladsl.{ HttpExt }
 
-import shapeless.{ HNil, :: }
+import shapeless.{ HNil }
 
 import config.{ Config }
 
@@ -21,15 +21,19 @@ final class JLeon()(
 
   implicit val fetchStrategyRepository: domain.FetchRepository = createFetchStrategyRepository
 
-  val mirrors: Map[Mirror.Prefix, Vector[Mirror :: Fetch :: HNil]] = {
+  val mirrors: MirrorRepository = {
     implicit val mirrorConfig: MirrorsConfig = config.mirrors
     Mirror.fromConfig
   }
 
-  val storage: Storage = {
+  val storage: LockingStorage = {
     implicit val storageConfig: StorageConfig = config.storage
     Storage.fromConfig
   }
+
+  val fetchManager: FetchManager = mirrors :: storage :: HNil
+
+  @inline def shutdown(): Future[akka.actor.Terminated] = actorSystem.terminate()
 }
 
 object JLeon {

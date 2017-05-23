@@ -3,10 +3,6 @@ package domain
 
 import scala.language.{ implicitConversions }
 
-import akka.{ NotUsed }
-import akka.util.{ ByteString }
-import akka.stream.scaladsl.{ Source }
-
 import shapeless.{ HNil, ::, HList, Generic }
 
 trait FetchManager extends Any {

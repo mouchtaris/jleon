@@ -13,17 +13,17 @@ import akka.http.scaladsl.model.{ Uri ⇒ AkkaUri }
 
 trait stdimport {
 
-  protected[jleon]type IOException = jio.IOException
+  type IOException = jio.IOException
 
-  protected[jleon]type ReadableByteChannel = jchannels.ReadableByteChannel
+  type ReadableByteChannel = jchannels.ReadableByteChannel
 
-  protected[jleon]type Path = jfile.Path
-  protected[jleon] object Path {
+  type Path = jfile.Path
+  object Path {
     def apply(uri: jnet.URI): Path = jfile.Paths.get(uri)
     def apply(s: String): Path = this(jnet.URI.create(s))
     def apply(uri: Uri): Path = this(uri: jnet.URI)
   }
-  protected[jleon] object File {
+  object File {
     val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
     val WRITE = jfile.StandardOpenOption.WRITE
 
@@ -38,20 +38,20 @@ trait stdimport {
       jfile.Files.deleteIfExists(p)
   }
 
-  protected[jleon] final def nonFatalCatch[T]: sutil.control.Exception.Catch[T] = sutil.control.Exception.nonFatalCatch
+  final def nonFatalCatch[T]: sutil.control.Exception.Catch[T] = sutil.control.Exception.nonFatalCatch
 
-  protected[jleon]type Try[T] = sutil.Try[T]
-  protected[jleon] val Try = sutil.Try
-  protected[jleon]type Success[T] = sutil.Success[T]
-  protected[jleon] val Success = sutil.Success
-  protected[jleon]type Failure[T] = sutil.Failure[T]
-  protected[jleon] val Failure = sutil.Failure
+  type Try[T] = sutil.Try[T]
+  val Try = sutil.Try
+  type Success[T] = sutil.Success[T]
+  val Success = sutil.Success
+  type Failure[T] = sutil.Failure[T]
+  val Failure = sutil.Failure
 
-  protected[jleon]type Future[T] = sconcurrent.Future[T]
-  protected[jleon] val Future = sconcurrent.Future
-  protected[jleon]type ExecutionContext = sconcurrent.ExecutionContext
+  type Future[T] = sconcurrent.Future[T]
+  val Future = sconcurrent.Future
+  type ExecutionContext = sconcurrent.ExecutionContext
 
-  protected[jleon]type Uri = AkkaUri
-  protected[jleon] val Uri = AkkaUri
+  type Uri = AkkaUri
+  val Uri = AkkaUri
 
 }

@@ -1,25 +1,27 @@
 package gv.jleon
 
-import gv.jleon.facade.JLeon
+import gv.jleon._
 
 object Application {
 
   def main(args: Array[String]): Unit = {
+    import jleon.materializer
+
     val jleon = JLeon()
-    jleon.actorSystem.terminate()
-    println {
-      jleon.mirrors
-    }
-    println {
-      jleon.storage
-    }
-    val u = Uri("file:///tmp/a")
-    println {
-      jleon.storage.lock(u)
-        .recoverWith {
-          case _ ⇒ jleon.storage.unlock(u) flatMap (_ ⇒ jleon.storage.lock(u))
+    val u = Uri("/build.sbt")
+    implicit val prefix: Mirror.Prefix = "local"
+    jleon.fetchManager.fetch(0, u)
+      .map { source ⇒
+        source.runForeach { bytestr ⇒
+          println(bytestr.decodeString(java.nio.charset.StandardCharsets.UTF_8))
         }
-    }
+      }
+      .recover {
+        case ex ⇒ println(s" failt: $ex")
+      }
+
+    scala.io.Source.stdin.bufferedReader().readLine()
+    jleon.actorSystem.terminate()
   }
 
 }
