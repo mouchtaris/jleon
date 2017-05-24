@@ -1,10 +1,6 @@
 package gv.jleon
 package facade
 
-import akka.actor.{ ActorSystem }
-import akka.stream.{ Materializer }
-import akka.http.scaladsl.{ HttpExt }
-
 import shapeless.{ HNil }
 
 import config.{ Config }

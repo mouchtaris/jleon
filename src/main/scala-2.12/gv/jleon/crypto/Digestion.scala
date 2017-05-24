@@ -1,7 +1,6 @@
 package gv.jleon
 package crypto
 
-import java.nio.charset.StandardCharsets.UTF_8
 import java.security.MessageDigest
 
 import scala.language.{ implicitConversions }

@@ -4,8 +4,7 @@ package util
 import akka.stream.{ scaladsl ⇒ akkas }
 
 trait AkkaStreamImports {
-  final type NotUsed = akka.NotUsed
-  final val NotUsed = akka.NotUsed
+  this: AkkaImports ⇒
 
   final type Source[Out, Mat] = akkas.Source[Out, Mat]
   final type Source1[Out] = Source[Out, NotUsed]
@@ -19,6 +18,7 @@ trait AkkaStreamImports {
   final type Flow1[In, Out] = Flow[In, Out, NotUsed]
   final val Flow = akkas.Flow
 
-  final type ByteString = akka.util.ByteString
-  final val ByteString = akka.util.ByteString
+  final type Materializer = akka.stream.Materializer
+  final type ActorMaterializer = akka.stream.ActorMaterializer
+  final val ActorMaterializer = akka.stream.ActorMaterializer
 }

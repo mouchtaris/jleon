@@ -17,8 +17,14 @@ object LockingStorages {
       storagePath resolveSibling lockName
     }
 
-    final def lock(uri: Uri): Try[ReadableByteChannel] =
+    final def lock(uri: Uri): Try[ReadableByteChannel] = {
+      import java.nio.file.FileAlreadyExistsException
       File.createNew(lockPath(uri))
+        .recoverWith {
+          case ex: FileAlreadyExistsException ⇒
+            Failure(new IllegalStateException(s"Path already locked: $uri"))
+        }
+    }
 
     final def unlock(uri: Uri): Try[Unit] =
       if (File.delete(lockPath(uri)))

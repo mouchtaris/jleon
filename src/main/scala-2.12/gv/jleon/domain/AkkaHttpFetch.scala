@@ -1,10 +1,5 @@
 package gv.jleon
 
-import akka.http.scaladsl.{ HttpExt }
-import akka.http.scaladsl.client.{ RequestBuilding }
-import akka.stream.{ Materializer }
-import akka.stream.scaladsl.{ Source }
-
 final case class AkkaHttpFetch(
   akkaHttp:     HttpExt,
   materializer: Materializer
@@ -18,7 +13,12 @@ object AkkaHttpFetch {
         implicit val _materializer = self.materializer
         Source
           .fromFuture(self.akkaHttp.singleRequest(RequestBuilding.Get(uri)))
-          .flatMapConcat(_.entity.dataBytes)
+          .flatMapConcat { response ⇒
+            response.status match {
+              case StatusCodes.Success(_) ⇒ response.entity.dataBytes
+              case _                      ⇒ Source.failed(new IllegalStateException(s"HTTP response: $response"))
+            }
+          }
       }
   }
 

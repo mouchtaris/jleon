@@ -1,9 +1,7 @@
 package gv.jleon
 package facade
 
-import akka.actor.{ ActorSystem }
-import akka.http.scaladsl.{ Http ⇒ AkkaHttp, HttpExt }
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.http.scaladsl.{ Http ⇒ AkkaHttp }
 
 protected[facade] trait ImplicitConstructions extends Any {
 

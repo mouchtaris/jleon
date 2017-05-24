@@ -13,17 +13,17 @@ import akka.http.scaladsl.model.{ Uri ⇒ AkkaUri }
 
 trait stdimport {
 
-  type IOException = jio.IOException
+  final type IOException = jio.IOException
 
-  type ReadableByteChannel = jchannels.ReadableByteChannel
+  final type ReadableByteChannel = jchannels.ReadableByteChannel
 
-  type Path = jfile.Path
-  object Path {
+  final type Path = jfile.Path
+  final object Path {
     def apply(uri: jnet.URI): Path = jfile.Paths.get(uri)
     def apply(s: String): Path = this(jnet.URI.create(s))
     def apply(uri: Uri): Path = this(uri: jnet.URI)
   }
-  object File {
+  final object File {
     val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
     val WRITE = jfile.StandardOpenOption.WRITE
 
@@ -38,20 +38,22 @@ trait stdimport {
       jfile.Files.deleteIfExists(p)
   }
 
+  final val UTF_8 = java.nio.charset.StandardCharsets.UTF_8
+
   final def nonFatalCatch[T]: sutil.control.Exception.Catch[T] = sutil.control.Exception.nonFatalCatch
 
-  type Try[T] = sutil.Try[T]
-  val Try = sutil.Try
-  type Success[T] = sutil.Success[T]
-  val Success = sutil.Success
-  type Failure[T] = sutil.Failure[T]
-  val Failure = sutil.Failure
+  final type Try[T] = sutil.Try[T]
+  final val Try = sutil.Try
+  final type Success[T] = sutil.Success[T]
+  final val Success = sutil.Success
+  final type Failure[T] = sutil.Failure[T]
+  final val Failure = sutil.Failure
 
-  type Future[T] = sconcurrent.Future[T]
-  val Future = sconcurrent.Future
-  type ExecutionContext = sconcurrent.ExecutionContext
+  final type Future[T] = sconcurrent.Future[T]
+  final val Future = sconcurrent.Future
+  final type ExecutionContext = sconcurrent.ExecutionContext
 
-  type Uri = AkkaUri
-  val Uri = AkkaUri
+  final type Uri = AkkaUri
+  final val Uri = AkkaUri
 
 }

@@ -1,23 +1,24 @@
 package gv.jleon
 
-import gv.jleon._
-
 object Application {
 
   def main(args: Array[String]): Unit = {
+    val jleon = JLeon()
     import jleon.materializer
 
-    val jleon = JLeon()
-    val u = Uri("/build.sbt")
     implicit val prefix: Mirror.Prefix = "local"
-    jleon.fetchManager.fetch(0, u)
-      .map { source ⇒
-        source.runForeach { bytestr ⇒
-          println(bytestr.decodeString(java.nio.charset.StandardCharsets.UTF_8))
-        }
-      }
-      .recover {
-        case ex ⇒ println(s" failt: $ex")
+    val u = Uri("/build.sbtea")
+
+    import jleon.actorSystem.dispatcher
+
+    val source = (jleon.fetchManager.fetch(0, _: Uri)) andThen Future.fromTry andThen Source.fromFuture apply u
+    source
+      .flatMapMerge(12, Predef.identity)
+      .map(_ decodeString UTF_8)
+      .runForeach(println)
+      .andThen {
+        case Success(Done) ⇒ println("*** Fetching ok")
+        case Failure(ex)   ⇒ println(s"fiald: $ex")
       }
 
     scala.io.Source.stdin.bufferedReader().readLine()

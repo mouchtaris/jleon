@@ -1,13 +1,22 @@
 package gv
 
-import jleon.util.{ stdconv, stdimport, AkkaStreamImports }
+import jleon.util.{
+  stdconv,
+  stdimport,
+  AkkaImports,
+  AkkaUtilImports,
+  AkkaStreamImports,
+  AkkaHttpImports,
+  AkkaActorImports
+}
 import jleon.facade.{ JLeonImports }
 
 package object jleon extends AnyRef
-    with stdconv
-    with stdimport
-    with AkkaStreamImports
-    with JLeonImports {
-
-  def apply(): JLeon = JLeon()
-}
+  with stdconv
+  with stdimport
+  with AkkaImports
+  with AkkaUtilImports
+  with AkkaStreamImports
+  with AkkaHttpImports
+  with AkkaActorImports
+  with JLeonImports
