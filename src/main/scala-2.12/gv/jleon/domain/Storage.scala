@@ -19,6 +19,14 @@ final case class Storage(
   def storagePath(uri: Uri): Storage.Path =
     basePath resolve SHA512.hexDigest(uri.toString)
 
+  def storagePathWithExt(uri: Uri, ext: String): Storage.Path = {
+    val storagePath: Path = this.storagePath(uri)
+    val name: Path = storagePath.getFileName
+    val nameWithExt: String = s"$name.$ext"
+    val pathWithExt: Path = storagePath resolveSibling nameWithExt
+    pathWithExt
+  }
+
   def fetch(uri: Uri): Try[ReadableByteChannel] =
     nonFatalCatch
       .withTry {

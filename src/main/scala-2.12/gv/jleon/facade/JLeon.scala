@@ -22,7 +22,7 @@ final class JLeon()(
     Mirror.fromConfig
   }
 
-  val storage: LockingStorage = {
+  val storage: Storage = {
     implicit val storageConfig: StorageConfig = config.storage
     Storage.fromConfig
   }

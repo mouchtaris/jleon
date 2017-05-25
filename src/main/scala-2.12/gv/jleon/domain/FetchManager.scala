@@ -7,7 +7,7 @@ import shapeless.{ HNil, ::, HList, Generic }
 
 trait FetchManager extends Any {
   def mirrors: MirrorRepository
-  def storage: LockingStorage
+  def storage: Storage
 
   private[this] def lock(uri: Uri): Try[Unit] =
     storage.lock(uri) map (_.close())
@@ -27,11 +27,21 @@ trait FetchManager extends Any {
     }
 
   def fetch(mirrorIndex: Int, uri: Uri)(implicit prefix: Mirror.Prefix): Try[Source[ByteString, NotUsed]] = {
-    for {
+    // TODO integrate Try in Source
+    val tryFetch = for {
       _ ← lock(uri)
       mirror :: fetch :: HNil ← getMirror(mirrorIndex)
       bytes = fetch(mirror urlFor uri.path)
     } yield bytes
+
+    tryFetch
+      .recoverWith {
+        case ex ⇒
+          storage.markFailed(uri)
+            .flatMap { _ ⇒
+              Failure { new RuntimeException(s"Fetching $uri failed because of", ex) }
+            }
+      }
   }
 
 }
@@ -42,32 +52,32 @@ object FetchManager {
     final type Self = T
 
     def mirrorsFrom(self: Self): MirrorRepository
-    def storageFrom(self: Self): LockingStorage
+    def storageFrom(self: Self): Storage
   }
 
-  final type Record1[Rest <: HList] = MirrorRepository :: LockingStorage :: Rest
+  final type Record1[Rest <: HList] = MirrorRepository :: Storage :: Rest
 
   final implicit def recordI[Rest <: HList]: Interpretation[Record1[Rest]] = new Interpretation[Record1[Rest]] {
     override def mirrorsFrom(self: Self): MirrorRepository = self match {
       case mirrors :: _ ⇒ mirrors
     }
-    override def storageFrom(self: Self): LockingStorage = self match {
+    override def storageFrom(self: Self): Storage = self match {
       case _ :: storage :: _ ⇒ storage
     }
   }
 
   final case class ADT(
     override val mirrors: MirrorRepository,
-    override val storage: LockingStorage
+    override val storage: Storage
   ) extends FetchManager
 
   final implicit def genericI[T, Repr](implicit generic: Generic.Aux[T, Repr], i: Interpretation[Repr]) = new Interpretation[T] {
     override def mirrorsFrom(self: Self): MirrorRepository = i mirrorsFrom generic.to(self)
-    override def storageFrom(self: Self): LockingStorage = i storageFrom generic.to(self)
+    override def storageFrom(self: Self): Storage = i storageFrom generic.to(self)
   }
 
   final implicit def apply[T](self: T)(implicit i: Interpretation[T]): FetchManager = new FetchManager {
     override def mirrors: MirrorRepository = i mirrorsFrom self
-    override def storage: LockingStorage = i storageFrom self
+    override def storage: Storage = i storageFrom self
   }
 }

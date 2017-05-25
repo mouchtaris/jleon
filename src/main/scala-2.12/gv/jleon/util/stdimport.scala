@@ -25,6 +25,7 @@ trait stdimport {
   }
   final object File {
     val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
+    val CREATE = jfile.StandardOpenOption.CREATE
     val WRITE = jfile.StandardOpenOption.WRITE
 
     def exists(p: Path): Boolean = jfile.Files.exists(p)
@@ -32,6 +33,10 @@ trait stdimport {
 
     def createNew(p: Path): Try[ReadableByteChannel] = Try {
       jfile.Files.newByteChannel(p, CREATE_NEW, WRITE)
+    }
+
+    def create(p: Path): Try[ReadableByteChannel] = Try {
+      jfile.Files.newByteChannel(p, CREATE, WRITE)
     }
 
     def delete(p: Path): Boolean =

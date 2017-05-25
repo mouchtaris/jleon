@@ -1,8 +1,10 @@
 package gv.jleon
 package domain
 
+import java.io.{ FileNotFoundException }
+import java.nio.file.{ FileAlreadyExistsException }
+
 object LockingStorages {
-  outer0 ⇒
 
   final type Underlying = Storage
 
@@ -10,28 +12,26 @@ object LockingStorages {
 
     def self: Underlying
 
-    final def lockPath(uri: Uri): Path = {
-      val storagePath = self.storagePath(uri)
-      val name = storagePath.getFileName
-      val lockName = s"$name.lock"
-      storagePath resolveSibling lockName
-    }
+    final def lockPath(uri: Uri): Storage.Path =
+      self storagePathWithExt (uri, "lock")
 
     final def lock(uri: Uri): Try[ReadableByteChannel] = {
-      import java.nio.file.FileAlreadyExistsException
       File.createNew(lockPath(uri))
         .recoverWith {
-          case ex: FileAlreadyExistsException ⇒
+          case _: FileAlreadyExistsException ⇒
             Failure(new IllegalStateException(s"Path already locked: $uri"))
         }
     }
+
+    final def isLocked(uri: Uri): Boolean =
+      File exists lockPath(uri)
 
     final def unlock(uri: Uri): Try[Unit] =
       if (File.delete(lockPath(uri)))
         Success {}
       else
         Failure {
-          new java.io.FileNotFoundException(s"$uri - ${lockPath(uri)}")
+          new FileNotFoundException(s"$uri - ${lockPath(uri)}")
         }
   }
 
