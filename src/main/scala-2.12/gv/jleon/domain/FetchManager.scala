@@ -33,18 +33,15 @@ trait FetchManager extends Any {
       bytes = fetch(mirror urlFor uri.path)
     } yield bytes
 
-    val tryWithErrorExplained: Try[Source1[ByteString]] = tryFetch.recoverWith {
-      case ex ⇒
-        storage.markFailed(uri).flatMap { _ ⇒
-          Failure {
-            new RuntimeException(s"Fetching $uri failed because of", ex)
-          }
-        }
-    }
-
     Source
-      .fromFuture { Future fromTry tryWithErrorExplained }
+      .fromFuture { Future fromTry tryFetch }
       .flatMapConcat { Predef.identity }
+      .recoverWithRetries(1, {
+        case ex ⇒
+          val err = new RuntimeException(s"Fetching $uri failed because of $ex", ex)
+          val tryMarkError = storage.markFailed(uri).flatMap(_ ⇒ Failure(err))
+          Source fromFuture (Future fromTry tryMarkError)
+      })
   }
 }
 

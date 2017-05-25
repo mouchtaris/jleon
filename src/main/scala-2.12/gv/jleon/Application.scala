@@ -7,7 +7,7 @@ object Application {
     import jleon.materializer
 
     implicit val prefix: Mirror.Prefix = "local"
-    val u = Uri("/build.sbtea")
+    val u = Uri("/build.ssbt")
 
     import jleon.actorSystem.dispatcher
 

@@ -1,7 +1,5 @@
 package gv.jleon
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.directives.{ DebuggingDirectives }
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.http.scaladsl.{ Http ⇒ AkkaHttp }

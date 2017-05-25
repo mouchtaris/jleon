@@ -2,10 +2,6 @@ package gv.jleon
 
 import scala.language.{ implicitConversions }
 
-import akka.{ NotUsed }
-import akka.stream.scaladsl.{ Source }
-import akka.util.{ ByteString }
-
 import shapeless.{ HList, :: }
 
 import `type`.{ TaggedType }
