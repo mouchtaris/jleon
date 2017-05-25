@@ -11,9 +11,7 @@ object Application {
 
     import jleon.actorSystem.dispatcher
 
-    val source = (jleon.fetchManager.fetch(0, _: Uri)) andThen Future.fromTry andThen Source.fromFuture apply u
-    source
-      .flatMapMerge(12, Predef.identity)
+    jleon.fetchManager.fetch(0, u)
       .map(_ decodeString UTF_8)
       .runForeach(println)
       .andThen {

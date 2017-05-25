@@ -26,24 +26,26 @@ trait FetchManager extends Any {
         Failure { new IndexOutOfBoundsException(s"Mirror index: $mirrorIndex") }
     }
 
-  def fetch(mirrorIndex: Int, uri: Uri)(implicit prefix: Mirror.Prefix): Try[Source[ByteString, NotUsed]] = {
-    // TODO integrate Try in Source
+  def fetch(mirrorIndex: Int, uri: Uri)(implicit prefix: Mirror.Prefix): Source1[ByteString] = {
     val tryFetch = for {
       _ ← lock(uri)
       mirror :: fetch :: HNil ← getMirror(mirrorIndex)
       bytes = fetch(mirror urlFor uri.path)
     } yield bytes
 
-    tryFetch
-      .recoverWith {
-        case ex ⇒
-          storage.markFailed(uri)
-            .flatMap { _ ⇒
-              Failure { new RuntimeException(s"Fetching $uri failed because of", ex) }
-            }
-      }
-  }
+    val tryWithErrorExplained: Try[Source1[ByteString]] = tryFetch.recoverWith {
+      case ex ⇒
+        storage.markFailed(uri).flatMap { _ ⇒
+          Failure {
+            new RuntimeException(s"Fetching $uri failed because of", ex)
+          }
+        }
+    }
 
+    Source
+      .fromFuture { Future fromTry tryWithErrorExplained}
+      .flatMapConcat { Predef.identity }
+  }
 }
 
 object FetchManager {
