@@ -43,7 +43,7 @@ trait FetchManager extends Any {
     }
 
     Source
-      .fromFuture { Future fromTry tryWithErrorExplained}
+      .fromFuture { Future fromTry tryWithErrorExplained }
       .flatMapConcat { Predef.identity }
   }
 }
