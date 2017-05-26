@@ -21,4 +21,10 @@ trait AkkaStreamImports {
   final type Materializer = akka.stream.Materializer
   final type ActorMaterializer = akka.stream.ActorMaterializer
   final val ActorMaterializer = akka.stream.ActorMaterializer
+
+  final val FileIO = akkas.FileIO
+  final type IOResult = akka.stream.IOResult
+  final val IOResult = akka.stream.IOResult
+
+  final val Keep = akkas.Keep
 }

@@ -37,6 +37,9 @@ final case class Storage(
           Failure { new IOException(s"File not found: $storagePath") }
       }
       .flatten
+
+  def write(uri: Uri): Sink[ByteString, Future[IOResult]] =
+    FileIO.toPath(storagePath(uri))
 }
 
 object Storage extends AnyRef

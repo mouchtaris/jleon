@@ -8,6 +8,8 @@ object LockingStorages {
 
   final type Underlying = Storage
 
+  final case class Locked(uri: Uri, cause: Throwable) extends Exception(s"locked: $uri", cause)
+
   trait Ops extends Any {
 
     def self: Underlying
@@ -15,11 +17,11 @@ object LockingStorages {
     final def lockPath(uri: Uri): Storage.Path =
       self storagePathWithExt (uri, "lock")
 
-    final def lock(uri: Uri): Try[ReadableByteChannel] = {
+    final def lock(uri: Uri): Try[WritableByteChannel] = {
       File.createNew(lockPath(uri))
         .recoverWith {
-          case _: FileAlreadyExistsException ⇒
-            Failure(new IllegalStateException(s"Path already locked: $uri"))
+          case cause: FileAlreadyExistsException ⇒
+            Failure(Locked(uri, cause))
         }
     }
 

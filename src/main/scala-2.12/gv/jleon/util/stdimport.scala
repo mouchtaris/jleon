@@ -16,6 +16,7 @@ trait stdimport {
   final type IOException = jio.IOException
 
   final type ReadableByteChannel = jchannels.ReadableByteChannel
+  type WritableByteChannel = jchannels.WritableByteChannel
 
   final type Path = jfile.Path
   final object Path {
@@ -27,16 +28,21 @@ trait stdimport {
     val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
     val CREATE = jfile.StandardOpenOption.CREATE
     val WRITE = jfile.StandardOpenOption.WRITE
+    val READ = jfile.StandardOpenOption.READ
 
     def exists(p: Path): Boolean = jfile.Files.exists(p)
     def exists(p: String): Boolean = exists(Path(p))
 
-    def createNew(p: Path): Try[ReadableByteChannel] = Try {
+    def createNew(p: Path): Try[WritableByteChannel] = Try {
       jfile.Files.newByteChannel(p, CREATE_NEW, WRITE)
     }
 
-    def create(p: Path): Try[ReadableByteChannel] = Try {
+    def openw(p: Path): Try[WritableByteChannel] = Try {
       jfile.Files.newByteChannel(p, CREATE, WRITE)
+    }
+
+    def openr(p: Path): Try[ReadableByteChannel] = Try {
+      jfile.Files.newByteChannel(p, READ)
     }
 
     def delete(p: Path): Boolean =

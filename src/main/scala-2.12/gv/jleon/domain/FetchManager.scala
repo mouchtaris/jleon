@@ -9,9 +9,6 @@ trait FetchManager extends Any {
   def mirrors: MirrorRepository
   def storage: Storage
 
-  private[this] def lock(uri: Uri): Try[Unit] =
-    storage.lock(uri) map (_.close())
-
   private[this] def getMirrors(implicit prefix: Mirror.Prefix): Try[IndexedSeq[Mirror :: Fetch :: HNil]] =
     mirrors.self get prefix match {
       case Some(ms) ⇒ Success { ms }
@@ -28,14 +25,26 @@ trait FetchManager extends Any {
 
   def fetch(mirrorIndex: Int, uri: Uri)(implicit prefix: Mirror.Prefix): Source1[ByteString] = {
     val tryFetch = for {
-      _ ← lock(uri)
+      _ ← storage lock uri
       mirror :: fetch :: HNil ← getMirror(mirrorIndex)
       bytes = fetch(mirror urlFor uri.path)
     } yield bytes
 
-    Source
+    val bytesSource: Source1[ByteString] = Source
       .fromFuture { Future fromTry tryFetch }
       .flatMapConcat { Predef.identity }
+    //    val wat: Sink[ByteString, Future[IOResult]] = storage.write(uri)
+    //    val flo = Flow[ByteString]
+    //      .flatMapConcat { bytestr ⇒
+    //        import
+    //        val futio: Future[IOResult] = Source.single(bytestr).runWith(wat)
+    //        Source.fromFuture(futio).map {
+    //          case result if result.wasSuccessful ⇒ bytestr
+    //        }
+    //      }
+
+    bytesSource
+      //      .via(flo)
       .recoverWithRetries(1, {
         case ex ⇒
           val err = new RuntimeException(s"Fetching $uri failed because of $ex", ex)

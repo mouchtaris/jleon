@@ -1,5 +1,7 @@
 package gv.jleon
 
+import scala.language.{ postfixOps }
+
 object Application {
 
   def main(args: Array[String]): Unit = {
