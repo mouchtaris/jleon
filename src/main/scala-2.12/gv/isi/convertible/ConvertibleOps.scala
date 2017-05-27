@@ -1,7 +1,7 @@
 package gv.isi
 package convertible
 
-import scala.language.{ higherKinds }
+import scala.language.{ implicitConversions, higherKinds }
 
 /**
  * Decorations for a convertible object.
