@@ -60,6 +60,7 @@ lazy val Jleon = (project in file("."))
       "-unchecked",
       "-Xfuture",
       "-Xlint",
+      "-Xprint:type",
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen",
