@@ -24,6 +24,7 @@ trait stdimport {
     def apply(s: String): Path = this(jnet.URI.create(s))
     def apply(uri: Uri): Path = this(uri: jnet.URI)
   }
+
   final object File {
     val CREATE_NEW = jfile.StandardOpenOption.CREATE_NEW
     val CREATE = jfile.StandardOpenOption.CREATE

@@ -10,5 +10,6 @@ trait TaggedType[_U] {
   sealed trait Tag
   final type t = tag.@@[U, Tag]
 
+  @inline
   final implicit def apply(u: U): t = tag[Tag].apply[U](u)
 }
