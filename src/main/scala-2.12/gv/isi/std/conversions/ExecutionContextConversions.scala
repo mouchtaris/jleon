@@ -17,5 +17,3 @@ trait ExecutionContextConversions extends Any {
   final implicit def javaExecutorToScalaExecutionContext(exec: Executor): ExecutionContext =
     ExecutionContext fromExecutor exec
 }
-
-object ExecutionContextConversions extends ExecutionContextConversions

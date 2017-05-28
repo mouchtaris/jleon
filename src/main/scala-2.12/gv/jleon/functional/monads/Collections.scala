@@ -1,4 +1,5 @@
-package gv.jleon.functional
+package gv.jleon
+package functional
 package monads
 
 import language.higherKinds

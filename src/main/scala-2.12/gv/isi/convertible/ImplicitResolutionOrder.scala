@@ -6,8 +6,9 @@ package convertible
  */
 object ImplicitResolutionOrder {
 
-  trait P25 extends ParentalConversions
-  trait P50 extends P25 with ChainedConversions
+  trait P0 extends AnyRef
+  trait P25 extends P0 with ChainedConversions
+  trait P50 extends P25 with ImplicitConversions
   trait P100 extends P50
 
   trait Conversions extends P100

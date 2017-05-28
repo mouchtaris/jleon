@@ -2,14 +2,18 @@ package gv.isi
 package std
 package conversions
 
+import scala.language.{ implicitConversions }
+
 trait UriConversions extends Any {
 
   import akka.http.scaladsl.model.{ Uri ⇒ AkkaUri }
   import java.net.{ URI ⇒ JavaUri }
 
-  final implicit def fromAkkaHttpUriToJavaNetUri: AkkaUri ⇒ JavaUri =
-    akka ⇒ JavaUri.create(akka.toString)
+  @inline
+  final implicit def fromAkkaHttpUriToJavaNetUri(akka: AkkaUri): JavaUri =
+    JavaUri.create(akka.toString)
 
-  final implicit def fromJavaNetUriToAkkaHttpUri: JavaUri ⇒ AkkaUri =
-    java ⇒ AkkaUri(java.toString)
+  @inline
+  final implicit def fromJavaNetUriToAkkaHttpUri(java: JavaUri): AkkaUri =
+    AkkaUri(java.toString)
 }

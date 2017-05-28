@@ -1,4 +1,6 @@
-package gv.jleon.functional.monads
+package gv.jleon
+package functional
+package monads
 
 trait ScalaGenericCompanions {
 

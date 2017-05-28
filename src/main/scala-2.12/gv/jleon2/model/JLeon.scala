@@ -13,27 +13,28 @@ import gv.isi
 import isi.std.conversions._
 import isi.convertible._
 
-trait JLeon {
+import leon2._
 
-  import leon2._
-
-  type Storage <: storage.Storage
-  val Storage: Storage
-  final type StorageRequest = Storage.Request
-
-  type MirrorRepository <: mirror.MirrorRepository
-  val MirrorRepository: MirrorRepository
-  final type MirrorPrefix = MirrorRepository.Prefix
-  final type Mirror = MirrorRepository.Mirror
+trait JLeon extends AnyRef
+{
+  // format: OFF
+  this: AnyRef
+    with slice.Storage
+    with slice.Mirror
+  ⇒
+  // format: ON
 
   val ExecutionContexts: facade.ExecutionContexts
+  val ErrorHandling: facade.ErrorHandling {
+    type Mirror = JLeon.this.Mirror
+  }
 
-  def serveRequest(prefix: MirrorPrefix, request: StorageRequest): Future[Unit] = {
+  def serveRequest(prefix: Mirror.Prefix, request: Storage.Request): Future[Unit] = {
     import ExecutionContexts.RequestProcessing
 
     object future {
-      val mirror: Future[Mirror] = MirrorRepository apply prefix
-      val lock: Future[storage.LockResult] = Storage tryLock request
+      val mirror = ErrorHandling.Mirror handle Mirror(prefix)
+      val lock = Storage tryLock request
     }
 
     future.mirror

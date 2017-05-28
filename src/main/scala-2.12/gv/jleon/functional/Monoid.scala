@@ -1,4 +1,5 @@
-package gv.jleon.functional
+package gv.jleon
+package functional
 
 trait Monoid[T] extends Any {
   def zero: T
