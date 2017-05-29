@@ -6,9 +6,6 @@ package slice
  * A Storage slice.
  */
 trait Storage {
-
   type Storage <: storage.Storage
-
-  val Storage: Storage
-
+  implicit val Storage: Storage
 }

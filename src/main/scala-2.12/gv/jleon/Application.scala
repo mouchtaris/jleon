@@ -1,7 +1,5 @@
 package gv.jleon
 
-import scala.language.{ postfixOps }
-
 object Application {
 
   def main(args: Array[String]): Unit = {
@@ -23,6 +21,7 @@ object Application {
 
     scala.io.Source.stdin.bufferedReader().readLine()
     jleon.actorSystem.terminate()
+    ()
   }
 
 }

@@ -3,12 +3,22 @@ package model
 package slice
 
 trait Error {
-  this: slice.Mirror ⇒
+  // format: OFF
+  this: Any
+    with slice.Mirror
+    with slice.Storage
+  ⇒
+  // format: ON
 
   type Error <: error.Error {
     type Mirror = Error.this.Mirror
-    type MirrorHandler = error.Mirror.Handler {
+    type MirrorHandler = error.Mirror {
       type Result = Error.this.Mirror.Handler
+    }
+
+    type Storage = Error.this.Storage
+    type StorageHandler = error.Storage {
+      type Result = Error.this.Storage.LockResult
     }
   }
 

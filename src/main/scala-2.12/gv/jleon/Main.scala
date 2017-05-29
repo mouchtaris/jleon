@@ -2,18 +2,18 @@ package gv
 package jleon
 
 import functional._
-
-object leon {
-  import java.net.URI
-  import java.nio.channels.{ Channels, ReadableByteChannel }
-  import java.nio.file.{ Files, Paths, Path }
-  import scala.concurrent.{ Future, Promise, ExecutionContext }
-  import scala.language.implicitConversions
-  import scala.collection.concurrent.TrieMap
-  import scala.util.control.{ Exception }
-  import scala.util.Try
-  import java.security.MessageDigest
-}
+//
+//object leon {
+//  import java.net.URI
+//  import java.nio.channels.{ Channels, ReadableByteChannel }
+//  import java.nio.file.{ Files, Paths, Path }
+//  import scala.concurrent.{ Future, Promise, ExecutionContext }
+//  import scala.language.implicitConversions
+//  import scala.collection.concurrent.TrieMap
+//  import scala.util.control.{ Exception }
+//  import scala.util.Try
+//  import java.security.MessageDigest
+//}
 
 object Main {
 

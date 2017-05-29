@@ -1,26 +1,14 @@
 package gv.jleon2
 package model
 
-import language.{ existentials }
-import concurrent.{ Future, ExecutionContext }
-import util.{ Try, Success, Failure }
+import concurrent.{ Future }
+import util.{ Success, Failure }
 
-import shapeless.{ HNil, :: }
-import scalaz.std._
-import scalaz.syntax._
-import scalaz.Monad
-import Monad._
-import scalaz.syntax.monad._
+import scalaz.syntax.monad.{ _ }
 
-import gv.{ jleon ⇒ leon }
-import gv.{ jleon2 ⇒ leon2 }
 import gv.isi
 //
-import isi.std.conversions._
-import isi.convertible._
 import isi.scalaz._
-
-import leon2._
 
 trait JLeon extends AnyRef {
   // format: OFF
@@ -33,35 +21,37 @@ trait JLeon extends AnyRef {
 
   val ExecutionContexts: facade.ExecutionContexts
 
+  object error {
+    val mirror: Error.MirrorHandler = Error.mirror
+    val storage: Error.StorageHandler = Error.storage
+  }
+
   def serveRequest(prefix: Mirror.Prefix, request: Storage.Request): Future[Unit] = {
     import ExecutionContexts.RequestProcessing
 
     object future {
-      val mirror = Error.mirror.apply(Mirror(prefix))
-      val lock = Storage tryLock request
+      val mirror: Future[Mirror.Handler] = error.mirror(Mirror(prefix))
+      val lock: Future[storage.LockResult] = error.storage(Storage tryLock request)
     }
 
-    future.mirror
-      .flatMap { mirror ⇒ future.lock.map { lock ⇒ mirror :: lock :: HNil } }
-      .flatMap { case mirror :: lock :: HNil ⇒ Future successful mirror.stigma }
-    //      .andThen {
-    //        case Success(mirror :: lock :: HNil) ⇒
-    //          println {
-    //            s"""
-    //               | mirror: $mirror
-    //               | lock: $lock
-    //            """
-    //          }
-    //        case Failure(ex) ⇒
-    //          println {
-    //            s"""
-    //               | Failure: $ex
-    //             """
-    //          }
-    //          ex.printStackTrace()
-    //      }
-    //      .map(_ ⇒ ())
-    ???
+    future.mirror tuple future.lock andThen {
+      case Success((mirror, lock)) ⇒
+        println {
+          s"""
+             | mirror: $mirror
+             | lock: $lock
+          """
+        }
+      case Failure(ex) ⇒
+        println {
+          s"""
+             | Failure: $ex
+           """
+        }
+        ex.printStackTrace()
+    } map {
+      _ ⇒ ()
+    }
   }
 
 }

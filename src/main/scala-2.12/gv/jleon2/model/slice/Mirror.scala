@@ -7,6 +7,5 @@ package slice
  */
 trait Mirror {
   type Mirror <: mirror.Mirror
-
   implicit val Mirror: Mirror
 }

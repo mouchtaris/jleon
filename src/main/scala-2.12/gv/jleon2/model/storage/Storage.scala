@@ -1,11 +1,13 @@
 package gv.jleon2
-package model.storage
+package model
+package storage
 
-import scala.concurrent.{ Future }
+import concurrent.{ Future }
 
 trait Storage {
 
   type Request
+  type LockResult <: storage.LockResult
 
   def tryLock(request: Request): Future[LockResult]
 

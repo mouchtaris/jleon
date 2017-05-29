@@ -1,11 +1,11 @@
 package gv
 package jleon2
 
-import language.implicitConversions
-import concurrent.{ Future, ExecutionContext, Await, duration }
-import util.{ Try }
-
-import gv.{ jleon2 ⇒ leon }
+//import language.implicitConversions
+//import concurrent.{ Future, ExecutionContext, Await, duration }
+//import util.{ Try }
+//
+//import gv.{ jleon2 ⇒ leon }
 
 object Application {
 
