@@ -2,4 +2,6 @@ package gv.jleon2
 package model
 package mirror
 
-trait Handler
+trait Handler {
+  def stigma: Int
+}

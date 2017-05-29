@@ -2,20 +2,22 @@ package gv.jleon2
 package model
 package error
 
-import concurrent.{ Future }
+import language.{ higherKinds }
 
-import shapeless.{ HNil, :: }
+import scalaz.{ Monad }
+import scalaz.syntax.bind._
 
-/**
-  * Handling Mirror Repository failures
-  */
-trait Mirror {
-  type Mirror <: mirror.Mirror
+object Mirror {
 
-  final type Prefix = Mirror # Prefix
-  final type Handler = Mirror # Handler
-  final type Result = Future[Prefix :: Handler :: HNil]
+  trait Handler extends Any {
+    type Result <: mirror.Handler
 
-  final def handle(futureMirror: Result): Result = ??? // TODO implement
+    final def apply[F[_]: Monad](result: F[Result]): F[Result] = {
+      result flatMap { result ⇒ Monad[F].pure(result) } map {
+        result ⇒
+          result
+      }
+    }
+  }
 
 }

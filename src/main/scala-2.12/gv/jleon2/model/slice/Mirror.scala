@@ -8,7 +8,7 @@ package slice
 trait Mirror extends Mirror.Include {
   type Mirror <: mirror.Mirror
 
-  val Mirror: Mirror
+  implicit val Mirror: Mirror
 
   final implicit val MirrorSlice: this.type = this
 
