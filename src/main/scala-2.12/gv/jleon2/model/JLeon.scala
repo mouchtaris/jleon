@@ -10,6 +10,8 @@ import gv.isi
 //
 import isi.scalaz._
 
+import error.Error.WithErrorHandling
+
 trait JLeon extends AnyRef {
   // format: OFF
   this: AnyRef
@@ -22,16 +24,18 @@ trait JLeon extends AnyRef {
   val ExecutionContexts: facade.ExecutionContexts
 
   object error {
-    val mirror: Error.MirrorHandler = Error.mirror
-    val storage: Error.StorageHandler = Error.storage
+    val mirror = Error.mirror
+    val storage = Error.storage
   }
 
   def serveRequest(prefix: Mirror.Prefix, request: Storage.Request): Future[Unit] = {
     import ExecutionContexts.RequestProcessing
 
     object future {
-      val mirror: Future[Mirror.Handler] = error.mirror(Mirror(prefix))
-      val lock: Future[storage.LockResult] = error.storage(Storage tryLock request)
+      val mirror: Future[Mirror.Handler] =
+        Mirror apply prefix withErrorHandling error.mirror
+      val lock: Future[Storage.LockResult] =
+        Storage tryLock request withErrorHandling error.storage
     }
 
     future.mirror tuple future.lock andThen {

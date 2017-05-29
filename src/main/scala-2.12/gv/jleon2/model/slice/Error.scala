@@ -6,6 +6,7 @@ object Error {
   trait Types extends AnyRef
       with slice.Mirror
       with slice.Storage {
+
     type Error <: error.Error {
       type Mirror = Types.this.Mirror
       type MirrorHandler = error.Mirror {
