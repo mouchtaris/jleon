@@ -28,15 +28,11 @@ trait JLeon extends AnyRef
   this: AnyRef
     with slice.Storage
     with slice.Mirror
+    with slice.Error
   ⇒
   // format: ON
 
   val ExecutionContexts: facade.ExecutionContexts
-
-  type Error <: error.Error {
-    type Mirror = JLeon.this.Mirror
-  }
-  val Error: Error
 
   def serveRequest(prefix: Mirror.Prefix, request: Storage.Request): Future[Unit] = {
     import ExecutionContexts.RequestProcessing

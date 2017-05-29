@@ -12,12 +12,7 @@ object Mirror {
   trait Handler extends Any {
     type Result <: mirror.Handler
 
-    final def apply[F[_]: Monad](result: F[Result]): F[Result] = {
-      result flatMap { result ⇒ Monad[F].pure(result) } map {
-        result ⇒
-          result
-      }
-    }
+    def apply[F[_]: Monad](result: F[Result]): F[Result]
   }
 
 }
