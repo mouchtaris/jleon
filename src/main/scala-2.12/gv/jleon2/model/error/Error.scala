@@ -5,10 +5,10 @@ package error
 /**
  * Handling Mirror Repository failures
  */
-trait Error {
-  type Mirror <: model.mirror.Mirror
+trait Error extends Any
+    with slice.Mirror.Types
+    with slice.Storage.Types {
   type MirrorHandler <: error.Mirror
-  type Storage <: model.storage.Storage
   type StorageHandler <: error.Storage
 
   //noinspection ApparentRefinementOfResultType

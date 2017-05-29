@@ -2,26 +2,25 @@ package gv.jleon2
 package model
 package slice
 
-trait Error {
-  // format: OFF
-  this: Any
-    with slice.Mirror
-    with slice.Storage
-  ⇒
-  // format: ON
+object Error {
+  trait Types extends AnyRef
+      with slice.Mirror
+      with slice.Storage {
+    type Error <: error.Error {
+      type Mirror = Types.this.Mirror
+      type MirrorHandler = error.Mirror {
+        type Result = Types.this.Mirror.Handler
+      }
 
-  type Error <: error.Error {
-    type Mirror = Error.this.Mirror
-    type MirrorHandler = error.Mirror {
-      type Result = Error.this.Mirror.Handler
+      type Storage = Types.this.Storage
+      type StorageHandler = error.Storage {
+        type Result = Types.this.Storage.LockResult
+      }
     }
 
-    type Storage = Error.this.Storage
-    type StorageHandler = error.Storage {
-      type Result = Error.this.Storage.LockResult
-    }
   }
+}
 
-  val Error: Error
-
+trait Error extends Error.Types {
+  implicit val Error: Error
 }

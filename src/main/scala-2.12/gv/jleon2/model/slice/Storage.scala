@@ -5,7 +5,12 @@ package slice
 /**
  * A Storage slice.
  */
-trait Storage {
-  type Storage <: storage.Storage
+object Storage {
+  trait Types extends Any {
+    type Storage <: storage.Storage
+  }
+}
+
+trait Storage extends Storage.Types {
   implicit val Storage: Storage
 }

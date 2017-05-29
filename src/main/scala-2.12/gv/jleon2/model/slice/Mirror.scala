@@ -5,7 +5,12 @@ package slice
 /**
  * A Mirror Repository Slice
  */
-trait Mirror {
-  type Mirror <: mirror.Mirror
+object Mirror {
+  trait Types extends Any {
+    type Mirror <: mirror.Mirror
+  }
+}
+
+trait Mirror extends Mirror.Types {
   implicit val Mirror: Mirror
 }
