@@ -2,8 +2,8 @@ package gv.isi
 package convertible
 
 /**
-  * Anything that is implicitly convertible to something, can also be explicitly.
-  */
+ * Anything that is implicitly convertible to something, can also be explicitly.
+ */
 trait ImplicitConversions extends Any {
 
   @inline

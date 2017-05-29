@@ -3,8 +3,8 @@ package model
 package slice
 
 /**
-  * A Mirror Repository Slice
-  */
+ * A Mirror Repository Slice
+ */
 trait Mirror {
   type Mirror <: mirror.Mirror
 

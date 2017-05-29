@@ -9,8 +9,8 @@ import shapeless.{ HNil, :: }
 import scalaz.{ Bind }
 
 /**
-  * Handling Mirror Repository failures
-  */
+ * Handling Mirror Repository failures
+ */
 trait Error {
   type Mirror <: model.mirror.Mirror
   type MirrorHandler <: error.Mirror.Handler

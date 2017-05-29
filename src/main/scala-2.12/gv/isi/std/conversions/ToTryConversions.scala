@@ -4,7 +4,6 @@ package std.conversions
 import scala.language.{ implicitConversions }
 import scala.util.{ Try, Success, Failure }
 
-
 /**
  * Provide conversions from standard type to [[scala.util.Try]].
  */

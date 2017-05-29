@@ -22,8 +22,7 @@ import isi.scalaz._
 
 import leon2._
 
-trait JLeon extends AnyRef
-{
+trait JLeon extends AnyRef {
   // format: OFF
   this: AnyRef
     with slice.Storage
@@ -45,23 +44,23 @@ trait JLeon extends AnyRef
     future.mirror
       .flatMap { mirror ⇒ future.lock.map { lock ⇒ mirror :: lock :: HNil } }
       .flatMap { case mirror :: lock :: HNil ⇒ Future successful mirror.stigma }
-//      .andThen {
-//        case Success(mirror :: lock :: HNil) ⇒
-//          println {
-//            s"""
-//               | mirror: $mirror
-//               | lock: $lock
-//            """
-//          }
-//        case Failure(ex) ⇒
-//          println {
-//            s"""
-//               | Failure: $ex
-//             """
-//          }
-//          ex.printStackTrace()
-//      }
-//      .map(_ ⇒ ())
+    //      .andThen {
+    //        case Success(mirror :: lock :: HNil) ⇒
+    //          println {
+    //            s"""
+    //               | mirror: $mirror
+    //               | lock: $lock
+    //            """
+    //          }
+    //        case Failure(ex) ⇒
+    //          println {
+    //            s"""
+    //               | Failure: $ex
+    //             """
+    //          }
+    //          ex.printStackTrace()
+    //      }
+    //      .map(_ ⇒ ())
     ???
   }
 
