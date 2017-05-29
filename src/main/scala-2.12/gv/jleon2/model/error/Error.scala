@@ -2,7 +2,7 @@ package gv.jleon2
 package model
 package error
 
-import language.{ higherKinds, existentials }
+import language.{ higherKinds }
 
 import scalaz.{ Monad }
 
@@ -15,26 +15,15 @@ trait Error extends Any
   type MirrorHandler <: error.Mirror
   type StorageHandler <: error.Storage
 
-  //noinspection ApparentRefinementOfResultType
-  implicit def mirror(implicit mirror: Mirror): MirrorHandler {
-    type Result = mirror.Handler
-  }
-  //noinspection ApparentRefinementOfResultType
-  implicit def storage(implicit storage: Storage): StorageHandler {
-    type Result = storage.LockResult
-  }
+  implicit def mirror: MirrorHandler
+  implicit def storage: StorageHandler
 }
 
 object Error {
 
   implicit class WithErrorHandling[F[_], R](val result: F[R]) extends AnyVal {
     @inline
-    def withErrorHandling(
-      handler: H forSome { type H <: Handler { type Result = R } }
-    )(
-      implicit
-      monad: Monad[F]
-    ): F[R] = handler(result)
+    def withErrorHandledBy(handler: Handler)(implicit m: Monad[F]): F[R] = handler(result)
   }
 
 }

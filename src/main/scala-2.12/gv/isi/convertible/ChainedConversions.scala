@@ -7,6 +7,6 @@ package convertible
 trait ChainedConversions extends Any {
 
   final implicit def chainedConversion[A, B, C](implicit a2b: A ~⇒ B, b2c: B ~⇒ C): A ~⇒ C =
-    a2b.self andThen b2c.self
+    a2b.apply _ andThen b2c.apply apply _
 
 }

@@ -4,10 +4,12 @@ package conversions
 
 import scala.language.{ implicitConversions }
 
+import _root_.java.{ util ⇒ jutil }
+
 trait ExecutionContextConversions extends Any {
 
   import scala.concurrent.{ ExecutionContext }
-  import java.util.concurrent.{ Executor, ExecutorService }
+  import jutil.concurrent.{ Executor, ExecutorService }
 
   @inline
   final implicit def javaExecutorServiceToScalaExecutionContext(service: ExecutorService): ExecutionContext =

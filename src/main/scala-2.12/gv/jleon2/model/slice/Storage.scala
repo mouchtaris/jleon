@@ -6,8 +6,11 @@ package slice
  * A Storage slice.
  */
 object Storage {
-  trait Types extends Any {
-    type Storage <: storage.Storage
+  trait Types extends Any
+      with slice.Uri {
+    type Storage <: storage.Storage {
+      type Request = Uri
+    }
   }
 }
 

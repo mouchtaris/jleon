@@ -1,12 +1,16 @@
-package gv.isi
+package gv
+package isi
 package convertible
 
+import scala.language.{ implicitConversions }
+
 /**
- * Anything that is implicitly convertible to something, can also be explicitly.
+ * Anything for which there exists an explicit conversion,
+ * has an implicit one as well.
  */
 trait ImplicitConversions extends Any {
 
   @inline
-  final implicit def implicitConversion[A, B](implicit a2b: A ⇒ B): A ~⇒ B = a2b
+  final implicit def implicitConversionFromConversion[A, B](a: A)(implicit conv: A ~⇒ B): B = conv(a)
 
 }

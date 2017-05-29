@@ -1,14 +1,15 @@
 package gv.isi
 package convertible
 
-import scala.language.{ implicitConversions, higherKinds }
+import language.{ implicitConversions, higherKinds }
+import annotation.{ implicitNotFound }
 
 /**
  * Decorations for a convertible object.
  * Receives decoration methods by [[ConvertibleOps.Ops]],
  * for converting to other type, through implicit conversions.
  */
-object ConvertibleOps {
+private[convertible] object ConvertibleOps {
 
   /**
    * Utility class, for when converting to effects.
@@ -21,8 +22,12 @@ object ConvertibleOps {
    * @tparam F the target effect
    */
   final implicit class ToEffectConvertible[S, F[_]](val self: S) extends AnyVal {
-    @inline def apply[T, SF[_]]()(implicit ev1: S <:< SF[T], ctor: ConstructableFrom[SF[T]]#To[F[T]]): F[T] =
+
+    @implicitNotFound("Cannot prove that Self is an Effectful type, or that Self is convertible to F[T]")
+    @inline
+    def apply[T, SF[_]]()(implicit ev1: S <:< SF[T], ctor: ConstructableFrom[SF[T]]#To[F[T]]): F[T] =
       ctor(ev1(self))
+
   }
 
   final object ToEffectConvertible {

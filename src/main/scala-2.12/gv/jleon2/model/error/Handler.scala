@@ -6,6 +6,5 @@ import language.{ higherKinds }
 import scalaz.{ Monad }
 
 trait Handler extends Any {
-  type Result
-  def apply[F[_]: Monad](result: F[Result]): F[Result]
+  def apply[F[_]: Monad, Result](result: F[Result]): F[Result]
 }

@@ -1,11 +1,12 @@
 package gv.isi
 
 package object convertible extends AnyRef
-    with ImplicitResolutionOrder.Conversions {
+    with ImplicitResolutionOrder.Conversions //    with ImplicitConversions
+    {
 
-  implicit class Conversion[A, B](override val self: A ⇒ B)
-    extends AnyVal
-    with ConversionOps.Ops[A, B]
+  trait Conversion[A, B] {
+    def apply(a: A): B
+  }
 
   final type ~⇒[A, B] = Conversion[A, B]
 

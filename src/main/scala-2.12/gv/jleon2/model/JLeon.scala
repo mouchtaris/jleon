@@ -28,24 +28,24 @@ trait JLeon extends AnyRef {
     val storage = Error.storage
   }
 
-  def serveRequest(prefix: Mirror.Prefix, request: Storage.Request): Future[Unit] = {
+  def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {
     import ExecutionContexts.RequestProcessing
+    import mirror.HandlingResult.{ Found ⇒ MirrorFound }
+    import storage.LockResult.{ Acquired ⇒ StorageAcquired, Found ⇒ StorageFound }
 
     object future {
-      val mirror: Future[Mirror.Handler] =
-        Mirror apply prefix withErrorHandling error.mirror
+      val mirror = {
+        Mirror(prefix)
+          .flatMap { _ handle request }
+          .withErrorHandledBy(error.mirror): Future[Mirror.Handler#Result]
+      }
       val lock: Future[Storage.LockResult] =
-        Storage tryLock request withErrorHandling error.storage
+        Storage tryLock request withErrorHandledBy error.storage
     }
 
     future.mirror tuple future.lock andThen {
-      case Success((mirror, lock)) ⇒
-        println {
-          s"""
-             | mirror: $mirror
-             | lock: $lock
-          """
-        }
+      case Success((_, StorageFound(rchannel))) ⇒
+        ()
       case Failure(ex) ⇒
         println {
           s"""
