@@ -1,8 +1,7 @@
 package gv.isi
 
 package object convertible extends AnyRef
-  with Conversions
-{
+    with Conversions {
 
   final type ~⇒[A, B] = Conversion[A, B]
 
