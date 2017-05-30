@@ -1,12 +1,8 @@
 package gv.isi
 
 package object convertible extends AnyRef
-    with ImplicitResolutionOrder.Conversions //    with ImplicitConversions
-    {
-
-  trait Conversion[A, B] {
-    def apply(a: A): B
-  }
+  with Conversions
+{
 
   final type ~⇒[A, B] = Conversion[A, B]
 

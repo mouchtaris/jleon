@@ -43,3 +43,5 @@ trait JavaIoConversions extends AnyRef {
     }
 
 }
+
+object JavaIoConversions extends JavaIoConversions

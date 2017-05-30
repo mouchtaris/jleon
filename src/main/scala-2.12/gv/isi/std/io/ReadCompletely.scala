@@ -13,7 +13,7 @@ import jnio.{ ByteBuffer }
 import jutil.{ Scanner }
 
 import io.{ ByteSource }
-import convertible.{ ~⇒, Convertible }
+import convertible.{ Convertible }
 import std.conversions._
 
 trait ReadCompletely[T] extends Any {
@@ -29,13 +29,7 @@ trait ReadCompletely[T] extends Any {
 
     val content: String = if (scanner.hasNext()) scanner.next() else ""
 
-    // convertible.chainedConversion[String, Array[Byte], ByteBuffer]
-    //    import convertible.{ chainedConversion ⇒ _ }
-    //    content.convertTo[ByteBuffer]
-    content.convertTo[Array[Byte]].convertTo[ByteBuffer]
-    //    implicit val vs: ByteSource[ReadableByteChannel] = ??? // std.io.ReadableByteChannelSource
-    implicitly[ByteSource[ReadableByteChannel]]
-    ???
+    content.convertTo[ByteBuffer]
   }
 
 }

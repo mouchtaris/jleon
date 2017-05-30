@@ -2,8 +2,7 @@ package gv
 package isi
 package std
 
-package object io extends AnyRef
-    with JavaIoInstances {
+package object io extends AnyRef {
 
   final implicit class ReadCompletelyDecoration[T](val self: T)
     extends AnyVal
