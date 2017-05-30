@@ -21,6 +21,6 @@ trait JavaIoInstances extends AnyRef {
    * interpretation as well.
    */
   final implicit def convertibleToReadableByteChannelByteSource[T](implicit conv: T ~⇒ ReadableByteChannel): ByteSource[T] =
-    (source: T, into: ByteBuffer) ⇒ ReadableByteChannelSource readInto (source.convertTo, into)
+    (source, into) ⇒ ReadableByteChannelSource readInto (source.convertTo, into)
 
 }
