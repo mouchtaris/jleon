@@ -5,10 +5,10 @@ import java.nio.ByteBuffer
 import java.nio.channels.WritableByteChannel
 
 import language.implicitConversions
-import concurrent.{duration, Future, Await, ExecutionContext}
+import concurrent.{ duration, Future, Await, ExecutionContext }
 import util.Try
 import ExecutionContext.Implicits.global
-import gv.{jleon2 ⇒ leon}
+import gv.{ jleon2 ⇒ leon }
 import leon.model.facade.ExecutionContexts
 
 object Application {
@@ -19,7 +19,7 @@ object Application {
     implicit def javaUri: Java = Java create uri
     implicit def akkaUri: Akka = Akka apply uri
 
-    def map[S](f: Uri⇒ S): S = f(this)
+    def map[S](f: Uri ⇒ S): S = f(this)
     def future: Future[this.type] =
       if (boundToFail)
         Future failed new RuntimeException("Request was bound to fail")
@@ -44,11 +44,11 @@ object Application {
   }
   trait CrappyHandler {
     this: BaseHandler ⇒
-    val saveit: Boolean => Boolean = Predef identity
+    val saveit: Boolean ⇒ Boolean = Predef identity
   }
   trait LokiHandler {
     this: BaseHandler ⇒
-    val saveit: Boolean => Boolean = ! _
+    val saveit: Boolean ⇒ Boolean = !_
   }
   trait HandlerFactory {
     type Result
@@ -172,14 +172,14 @@ object Application {
 //  }
 
   final case class Leon() extends leon.model.JLeon
-    with Types.mirror
-    with leon.model.slice.Mirror
-    with leon.model.slice.Storage
-    with leon.model.slice.Error
-  {
-  /** As seen from class Leon, the missing signatures are as follows.
-   *  For convenience, these are usable as stub implementations.
-   */
+      with Types.mirror
+      with leon.model.slice.Mirror
+      with leon.model.slice.Storage
+      with leon.model.slice.Error {
+    /**
+     * As seen from class Leon, the missing signatures are as follows.
+     *  For convenience, these are usable as stub implementations.
+     */
     // Members declared in gv.jleon2.model.slice.Error
     val Error = ???
 
