@@ -139,16 +139,17 @@ object Application {
     type LockResult = storage.LockResult
 
     def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
-      request ⇒ Future successful storage.LockResult.Acquired(new WritableByteChannel {
-        def write(src: ByteBuffer): Int = {
-          println(s"$request: hahahaha: ${src.toString}")
-          val written = src.remaining() + 1
-          src.position(src.limit())
-          written
-        }
-        def isOpen: Boolean = true
-        def close(): Unit = ()
-      })
+      request ⇒
+        Future successful storage.LockResult.Acquired(new WritableByteChannel {
+          def write(src: ByteBuffer): Int = {
+            println(s"$request: hahahaha: ${src.toString}")
+            val written = src.remaining() + 1
+            src.position(src.limit())
+            written
+          }
+          def isOpen: Boolean = true
+          def close(): Unit = ()
+        })
     }
   }
 
@@ -157,8 +158,7 @@ object Application {
       with Types.storage
       with leon.model.slice.Mirror
       with leon.model.slice.Storage
-      with leon.model.slice.Error
-  {
+      with leon.model.slice.Error {
     import leon.model.slice
 
     val Mirror = Application.Mirror()
@@ -191,7 +191,6 @@ object Application {
 
   final case class Leon() extends leon.model.JLeon with Slices {
   }
-
 
   def main(args: Array[String]): Unit = {
 
