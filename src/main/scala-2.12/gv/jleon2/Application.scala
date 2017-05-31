@@ -50,20 +50,6 @@ object Application {
     this: BaseHandler ⇒
     val saveit: Boolean ⇒ Boolean = !_
   }
-  trait HandlerFactory {
-    type Result
-    type Request <: Application.Uri
-    val successImpl: Application.Uri ⇒ Future[Result]
-
-    trait Base extends BaseHandler {
-      type Request <: HandlerFactory.this.Request
-      type Result = HandlerFactory.this.Result
-      def success: Application.Uri ⇒ Future[Result] = successImpl
-    }
-
-    trait Crappy extends CrappyHandler with Base
-    trait Loki extends LokiHandler with Base
-  }
 
   object Types {
     import leon.model.slice
@@ -77,7 +63,7 @@ object Application {
     trait mirror extends slice.Mirror.Types with uri {
       thisSlice ⇒
 
-      trait Handler extends leon.model.mirror.Handler {
+      trait Handler extends leon.model.mirror.Handler with BaseHandler {
         // Inputs
         final type Request = thisSlice.Uri
         // Outputs
@@ -103,10 +89,8 @@ object Application {
     import leon.model.mirror
 
     private[this] object handlers {
-      object Handler extends HandlerFactory {
-        type Result = Handler#Result
-        type Request = Handler#Request
-        val successImpl: Application.Uri ⇒ Future[Result] =
+      trait Base extends Types.mirror.Handler {
+        def success: Application.Uri ⇒ Future[Result] =
           request ⇒
             Future successful mirror.HandlingResult.Found {
               import isi.convertible._
@@ -118,9 +102,14 @@ object Application {
                 .convertTo[Array[Byte]]
                 .convertTo[ReadableByteChannel]
             }
+
       }
-      final case object Crappy extends Handler.Crappy with Types.mirror.Handler
-      final case object Loki extends Handler.Loki with Types.mirror.Handler
+
+      trait Loki extends Base with LokiHandler
+      trait Crappy extends Base with CrappyHandler
+
+      final case object Crappy extends Crappy
+      final case object Loki extends Loki
     }
 
     def apply(prefix: Prefix): Future[Handler] = Future successful prefix map {
@@ -129,53 +118,38 @@ object Application {
     }
   }
 
-//  final case class Storage() extends leon.model.storage.Storage {
-//    import model.storage
-//
-//    type Request = Uri
-//    type LockResult = storage.LockResult
-//
-//    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
-//      case Uri(_, boundToFail) if boundToFail ⇒
-//        Requests.failed
-//      case _ ⇒ Future successful storage.LockResult.Acquired(new WritableByteChannel {
-//        def write(src: ByteBuffer): Int = {
-//          println(s"hahahaha: ${src.toString}")
-//          val written = src.remaining() + 1
-//          src.position(src.limit())
-//          written
-//        }
-//        def isOpen: Boolean = true
-//        def close(): Unit = ()
-//      })
-//    }
-//  }
+  //  final case class Storage() extends leon.model.storage.Storage {
+  //    import model.storage
+  //
+  //    type Request = Uri
+  //    type LockResult = storage.LockResult
+  //
+  //    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
+  //      case Uri(_, boundToFail) if boundToFail ⇒
+  //        Requests.failed
+  //      case _ ⇒ Future successful storage.LockResult.Acquired(new WritableByteChannel {
+  //        def write(src: ByteBuffer): Int = {
+  //          println(s"hahahaha: ${src.toString}")
+  //          val written = src.remaining() + 1
+  //          src.position(src.limit())
+  //          written
+  //        }
+  //        def isOpen: Boolean = true
+  //        def close(): Unit = ()
+  //      })
+  //    }
+  //  }
 
-  final object Slices {
-    import leon.model.slice
-
-    val Mirror: Types.mirror.Mirror = Application.Mirror()
-  }
-//
-//  final case class Error() extends leon.model.error.Error {
-//    type Storage
-//    type Mirror = this.type
-//    type Uri = this.type
-//
-//    type MirrorHandler = this.type
-//    type StorageHandler = this.type
-//
-//    def mirror: Error.this.type = ???
-//
-//    def storage: Error.this.type = ???
-//
-//  }
-
-  final case class Leon() extends leon.model.JLeon
+  trait Slices extends AnyRef
       with Types.mirror
       with leon.model.slice.Mirror
       with leon.model.slice.Storage
-      with leon.model.slice.Error {
+      with leon.model.slice.Error
+  {
+    import leon.model.slice
+
+    val Mirror = Application.Mirror()
+
     /**
      * As seen from class Leon, the missing signatures are as follows.
      *  For convenience, these are usable as stub implementations.
@@ -186,22 +160,37 @@ object Application {
     // Members declared in gv.jleon2.model.JLeon
     val ExecutionContexts = ???
 
-    // Members declared in gv.jleon2.model.slice.Mirror
-    implicit val Mirror = ???
 
     // Members declared in gv.jleon2.model.slice.Storage
     implicit val Storage = ???
+  }
+  //
+  //  final case class Error() extends leon.model.error.Error {
+  //    type Storage
+  //    type Mirror = this.type
+  //    type Uri = this.type
+  //
+  //    type MirrorHandler = this.type
+  //    type StorageHandler = this.type
+  //
+  //    def mirror: Error.this.type = ???
+  //
+  //    def storage: Error.this.type = ???
+  //
+  //  }
 
-//    type Storage = Application.Storage
-//    type Error = Application.Error
-//
-//    val ExecutionContexts: ExecutionContexts = new ExecutionContexts {
-//      val RequestProcessing: ExecutionContext = global
-//    }
-//
-//    val Mirror: Mirror = Application.Mirror()
-//    val Storage: Storage = Application.Storage()
-//    val Error: Error = Application.Error()
+  final case class Leon() extends leon.model.JLeon with Slices {
+
+    //    type Storage = Application.Storage
+    //    type Error = Application.Error
+    //
+    //    val ExecutionContexts: ExecutionContexts = new ExecutionContexts {
+    //      val RequestProcessing: ExecutionContext = global
+    //    }
+    //
+    //    val Mirror: Mirror = Application.Mirror()
+    //    val Storage: Storage = Application.Storage()
+    //    val Error: Error = Application.Error()
   }
 
   //  object Implicits extends AnyRef

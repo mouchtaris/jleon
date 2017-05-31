@@ -46,19 +46,19 @@ trait JLeon extends AnyRef {
     future.mirror tuple future.lock andThen {
       case Success((_, StorageFound(rchannel))) ⇒
         rchannel
-//      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
-//        rchannel
-//      case Failure(ex) ⇒
-//        println {
-//          s"""
-//             | Failure: $ex
-//           """
-//        }
-//        ex.printStackTrace()
+      //      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
+      //        rchannel
+      //      case Failure(ex) ⇒
+      //        println {
+      //          s"""
+      //             | Failure: $ex
+      //           """
+      //        }
+      //        ex.printStackTrace()
     } map {
       _ ⇒ ()
     }
-//???
+    //???
   }
 
 }
