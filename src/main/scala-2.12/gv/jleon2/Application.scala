@@ -63,33 +63,47 @@ object Application {
     trait mirror extends slice.Mirror.Types with uri {
       thisSlice ⇒
 
-      trait Handler extends leon.model.mirror.Handler with BaseHandler {
+      final type Handler = leon.model.mirror.Handler with BaseHandler {
         // Inputs
-        final type Request = thisSlice.Uri
+        type Request = thisSlice.Uri
         // Outputs
-        final type Result = leon.model.mirror.HandlingResult
+        type Result = leon.model.mirror.HandlingResult
       }
 
-      type SuperMirror = Mirror
+      final type SuperMirror = Mirror
 
-      trait Mirror extends leon.model.mirror.Mirror {
+      final type Mirror = leon.model.mirror.Mirror {
+        // Inputs
+        type Prefix = String
         // Outputs
-        final type Handler = thisSlice.Handler
+        type Handler = thisSlice.Handler
       }
     }
     object mirror extends mirror
     type Mirror = mirror.Mirror
 
-    trait storage extends slice.Storage.Types with uri
+    trait storage extends slice.Storage.Types with uri {
+      thisSlice ⇒
+
+      final type Storage = leon.model.storage.Storage {
+        type Request = thisSlice.Uri
+      }
+    }
     object storage extends storage
     type Storage = storage.Storage
   }
 
-  final case class Mirror() extends Types.Mirror {
+  final case class Mirror() extends leon.model.mirror.Mirror {
     import leon.model.mirror
 
+    type Handler = Types.mirror.Handler
+    type Prefix = String
+
     private[this] object handlers {
-      trait Base extends Types.mirror.Handler {
+      trait Base extends leon.model.mirror.Handler with BaseHandler {
+        final type Request = Types.uri.Uri
+        final type Result = leon.model.mirror.HandlingResult
+
         def success: Application.Uri ⇒ Future[Result] =
           request ⇒
             Future successful mirror.HandlingResult.Found {
@@ -118,30 +132,29 @@ object Application {
     }
   }
 
-  //  final case class Storage() extends leon.model.storage.Storage {
-  //    import model.storage
-  //
-  //    type Request = Uri
-  //    type LockResult = storage.LockResult
-  //
-  //    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
-  //      case Uri(_, boundToFail) if boundToFail ⇒
-  //        Requests.failed
-  //      case _ ⇒ Future successful storage.LockResult.Acquired(new WritableByteChannel {
-  //        def write(src: ByteBuffer): Int = {
-  //          println(s"hahahaha: ${src.toString}")
-  //          val written = src.remaining() + 1
-  //          src.position(src.limit())
-  //          written
-  //        }
-  //        def isOpen: Boolean = true
-  //        def close(): Unit = ()
-  //      })
-  //    }
-  //  }
+  final case class Storage() extends leon.model.storage.Storage {
+    import model.storage
+
+    type Request = Uri
+    type LockResult = storage.LockResult
+
+    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
+      request ⇒ Future successful storage.LockResult.Acquired(new WritableByteChannel {
+        def write(src: ByteBuffer): Int = {
+          println(s"$request: hahahaha: ${src.toString}")
+          val written = src.remaining() + 1
+          src.position(src.limit())
+          written
+        }
+        def isOpen: Boolean = true
+        def close(): Unit = ()
+      })
+    }
+  }
 
   trait Slices extends AnyRef
       with Types.mirror
+      with Types.storage
       with leon.model.slice.Mirror
       with leon.model.slice.Storage
       with leon.model.slice.Error
@@ -149,6 +162,7 @@ object Application {
     import leon.model.slice
 
     val Mirror = Application.Mirror()
+    val Storage = Application.Storage()
 
     /**
      * As seen from class Leon, the missing signatures are as follows.
@@ -159,10 +173,6 @@ object Application {
 
     // Members declared in gv.jleon2.model.JLeon
     val ExecutionContexts = ???
-
-
-    // Members declared in gv.jleon2.model.slice.Storage
-    implicit val Storage = ???
   }
   //
   //  final case class Error() extends leon.model.error.Error {
@@ -180,72 +190,21 @@ object Application {
   //  }
 
   final case class Leon() extends leon.model.JLeon with Slices {
-
-    //    type Storage = Application.Storage
-    //    type Error = Application.Error
-    //
-    //    val ExecutionContexts: ExecutionContexts = new ExecutionContexts {
-    //      val RequestProcessing: ExecutionContext = global
-    //    }
-    //
-    //    val Mirror: Mirror = Application.Mirror()
-    //    val Storage: Storage = Application.Storage()
-    //    val Error: Error = Application.Error()
   }
 
-  //  object Implicits extends AnyRef
-  //    with isi.std.conversions.ExecutionContextConversions
-  //    with isi.std.conversions.UriConversions
-  //  import Implicits._
-  //
 
-  //
-  //  class Storage extends leon.model.storage.Storage {
-  //    import leon.model.storage.LockResult
-  //
-  //    override type Request = Uri
-  //
-  //    override def tryLock(request: Uri): Future[LockResult] = Future successful {
-  //      LockResult Failed new RuntimeException(s"no locking yet: $request")
-  //    }
-  //  }
-  //
-  //  class Mirror extends leon.model.mirror.Mirror
-  //
-  //  class MirrorRepository extends leon.model.mirror.MirrorRepository {
-  //    override type Prefix = String
-  //    override type Mirror = Application.Mirror
-  //
-  //    override def apply(prefix: Prefix): Future[Mirror] = prefix match {
-  //      case "bohos" ⇒ Future successful new Mirror
-  //      case _       ⇒ Future failed new NoSuchElementException(s"prefix poo: $prefix")
-  //    }
-  //  }
-  //
-  //  class JLeon extends leon.model.JLeon {
-  //    import java.util.concurrent.Executors.{ newWorkStealingPool }
-  //
-  //    override type Storage = Application.Storage
-  //    override object Storage extends Storage
-  //
-  //    override type MirrorRepository = Application.MirrorRepository
-  //    override object MirrorRepository extends MirrorRepository
-  //
-  //    override object ExecutionContexts extends leon.model.facade.ExecutionContexts {
-  //      override val RequestProcessing: ExecutionContext = newWorkStealingPool(16)
-  //    }
-  //  }
-  //
-  //  def main(args: Array[String]): Unit = {
-  //
-  //    val leon = new JLeon
-  //
-  //    Await.ready(
-  //      leon.serveRequest("bohos", Uri("/bohos/me/a/las/rajas")),
-  //      duration.Duration(3, duration.SECONDS)
-  //    )
-  //
-  //  }
+  def main(args: Array[String]): Unit = {
+
+    val leon = new Leon
+    val maximumPatience = duration.Duration(3, duration.SECONDS)
+    val futureResult = {
+      val uri = Uri("/bohos/me/a/las/rajas", boundToFail = true)
+      val prefix = "bohos"
+      leon serveRequest (prefix, uri)
+    }
+
+    Await.ready(futureResult, maximumPatience)
+  }
 
 }
 
