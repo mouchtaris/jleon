@@ -4,8 +4,8 @@ package slice
 
 object Error {
   trait Types extends AnyRef
-      with slice.Mirror
-      with slice.Storage {
+      with slice.Mirror.Types
+      with slice.Storage.Types {
 
     type Error <: error.Error {
       type Mirror = Types.this.Mirror
