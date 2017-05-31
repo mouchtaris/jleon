@@ -8,11 +8,13 @@ package slice
 object Mirror {
 
   trait Types extends Any
-      with slice.Uri {
+      with slice.Uri.Types {
 
     type Mirror <: mirror.Mirror {
-      type Handler = mirror.Handler {
-        type Request = Types.this.Uri
+      // Outputs
+      type Handler <: mirror.Handler {
+        // Inputs
+        type Request >: Types.this.Uri
       }
     }
 

@@ -37,7 +37,7 @@ trait JLeon extends AnyRef {
       val mirror = {
         Mirror(prefix)
           .flatMap { _ handle request }
-          .withErrorHandledBy(error.mirror): Future[Mirror.Handler#Result]
+          .withErrorHandledBy(error.mirror)
       }
       val lock: Future[Storage.LockResult] =
         Storage tryLock request withErrorHandledBy error.storage
@@ -45,17 +45,20 @@ trait JLeon extends AnyRef {
 
     future.mirror tuple future.lock andThen {
       case Success((_, StorageFound(rchannel))) ⇒
-        ()
-      case Failure(ex) ⇒
-        println {
-          s"""
-             | Failure: $ex
-           """
-        }
-        ex.printStackTrace()
+        rchannel
+//      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
+//        rchannel
+//      case Failure(ex) ⇒
+//        println {
+//          s"""
+//             | Failure: $ex
+//           """
+//        }
+//        ex.printStackTrace()
     } map {
       _ ⇒ ()
     }
+//???
   }
 
 }

@@ -6,7 +6,10 @@ import concurrent.{ Future }
 
 trait Mirror {
 
+  // Inputs
   type Prefix
+
+  // Outputs
   type Handler <: mirror.Handler
 
   // TODO

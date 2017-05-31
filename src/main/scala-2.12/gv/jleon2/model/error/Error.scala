@@ -9,9 +9,14 @@ import scalaz.{ Monad }
 /**
  * Handling Mirror Repository failures
  */
-trait Error extends Any
+trait Error {
+  // format: OFF
+  this: Any
     with slice.Mirror.Types
-    with slice.Storage.Types {
+    with slice.Storage.Types
+  ⇒
+  // format: ON
+
   type MirrorHandler <: error.Mirror
   type StorageHandler <: error.Storage
 

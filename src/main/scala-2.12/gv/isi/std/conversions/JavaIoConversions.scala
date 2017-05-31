@@ -15,25 +15,29 @@ import convertible.{ ~⇒ }
 
 trait JavaIoConversions extends AnyRef {
 
-  final implicit val readableByteChannelToInputStreamConversion: ReadableByteChannel ~⇒ InputStream =
+  final implicit val `ReadableByteChannel ~=> InputStream`: ReadableByteChannel ~⇒ InputStream =
     Channels newInputStream
 
-  final implicit val inputStreamToReadableByteChannelConversion: InputStream ~⇒ ReadableByteChannel =
+  final implicit val `InputStream ~=> ReadableByteChannel`: InputStream ~⇒ ReadableByteChannel =
     Channels newChannel
 
-  final implicit val writableByteChannelToOutputStreamConversion: WritableByteChannel ~⇒ OutputStream =
+  final implicit val `WritableByteChannel ~=> OutputStream`: WritableByteChannel ~⇒ OutputStream =
     Channels newOutputStream
 
-  final implicit val outputStreamToWritableByteChannelConversion: OutputStream ~⇒ WritableByteChannel =
-    Channels newChannel _
+  final implicit val `OutputStream ~=> WritableByteChannel`: OutputStream ~⇒ WritableByteChannel =
+    Channels newChannel
 
-  final implicit def byteSourceToReadableByteChannel[T: ByteSource]: T ~⇒ ReadableByteChannel =
+  final implicit def `T: ByteSource ~=> ReadableByteChannel`[T: ByteSource]: T ~⇒ ReadableByteChannel =
     (self: T) ⇒ new ReadableByteChannel {
       def isOpen: Boolean = true
       def close(): Unit = ()
       def read(into: ByteBuffer): Int = ByteSource[T] readInto (self, into)
     }
 
+  final implicit def `ReadableByteChannel ~=> ByteSource[T]`: ReadableByteChannel ~⇒ ByteSource[Any] =
+    (channel: ReadableByteChannel) ⇒ new ByteSource[Any] {
+      def readInto(source: Any, into: ByteBuffer): Int = channel read into
+    }
 }
 
 object JavaIoConversions extends JavaIoConversions
