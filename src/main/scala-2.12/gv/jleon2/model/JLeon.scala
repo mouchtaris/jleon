@@ -30,6 +30,7 @@ trait JLeon extends AnyRef {
 
   def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {
     import ExecutionContexts.RequestProcessing
+    //    import concurrent.ExecutionContext.Implicits.global
     import mirror.HandlingResult.{ Found ⇒ MirrorFound }
     import storage.LockResult.{ Acquired ⇒ StorageAcquired, Found ⇒ StorageFound }
 
@@ -43,22 +44,21 @@ trait JLeon extends AnyRef {
         Storage tryLock request withErrorHandledBy error.storage
     }
 
-    future.mirror tuple future.lock andThen {
+    future.mirror zip future.lock andThen {
       case Success((_, StorageFound(rchannel))) ⇒
         rchannel
-      //      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
-      //        rchannel
-      //      case Failure(ex) ⇒
-      //        println {
-      //          s"""
-      //             | Failure: $ex
-      //           """
-      //        }
-      //        ex.printStackTrace()
+      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
+        rchannel
+      case Failure(ex) ⇒
+        println {
+          s"""
+             | Failure: $ex
+           """
+        }
+        ex.printStackTrace()
     } map {
       _ ⇒ ()
     }
-    //???
   }
 
 }

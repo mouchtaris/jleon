@@ -4,15 +4,27 @@ package jleon2
 import java.nio.ByteBuffer
 import java.nio.channels.WritableByteChannel
 
-import language.implicitConversions
+import language.{ implicitConversions, postfixOps, higherKinds }
 import concurrent.{ duration, Future, Await, ExecutionContext }
 import util.Try
 import ExecutionContext.Implicits.global
+
+import com.typesafe.scalalogging.{ StrictLogging }
+
+import scalaz.{ Monad }
+
 import gv.{ jleon2 ⇒ leon }
 import leon.model.facade.ExecutionContexts
 
 object Application {
+  app ⇒
 
+  object Uri {
+    trait Types extends leon.model.slice.Uri.Types {
+      final type Uri = app.Uri
+    }
+    object Types extends Types
+  }
   final case class Uri(uri: String, boundToFail: Boolean) {
     import java.net.{ URI ⇒ Java }
     import akka.http.scaladsl.model.{ Uri ⇒ Akka }
@@ -51,74 +63,49 @@ object Application {
     val saveit: Boolean ⇒ Boolean = !_
   }
 
-  object Types {
-    import leon.model.slice
-
-    trait uri extends slice.Uri.Types {
-      final type Uri = Application.Uri
+  object Error {
+    final case class Mirror() extends leon.model.error.Mirror {
+      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
+        result
     }
-    object uri extends uri
-    type Uri = uri.Uri
-
-    trait mirror extends slice.Mirror.Types with uri {
-      thisSlice ⇒
-
-      final type Handler = leon.model.mirror.Handler with BaseHandler {
-        // Inputs
-        type Request = thisSlice.Uri
-        // Outputs
-        type Result = leon.model.mirror.HandlingResult
-      }
-
-      final type SuperMirror = Mirror
-
-      final type Mirror = leon.model.mirror.Mirror {
-        // Inputs
-        type Prefix = String
-        // Outputs
-        type Handler = thisSlice.Handler
-      }
+    final case class Storage() extends leon.model.error.Storage {
+      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
+        result
     }
-    object mirror extends mirror
-    type Mirror = mirror.Mirror
-
-    trait storage extends slice.Storage.Types with uri {
-      thisSlice ⇒
-
-      final type Storage = leon.model.storage.Storage {
-        type Request = thisSlice.Uri
-        type LockResult = leon.model.storage.LockResult
-      }
+    trait Types extends leon.model.slice.Error.Types {
+      final type Error = app.Error
     }
-    object storage extends storage
-    type Storage = storage.Storage
-
-    trait error extends slice.Error.Types with mirror {
-      type Error = leon.model.error.Error {
-        type Mirror = mirror.Mirror
-        type MirrorHandler = leon.model.error.Mirror {
-          type Result = mirror.Handler
-        }
-
-        type Storage = storage.Storage
-        type StorageHandler = leon.model.error.Storage {
-          type Result = storage.Storage#LockResult
-        }
-      }
-    }
+    object Types extends Types
   }
 
+  final case class Error() extends leon.model.error.Error {
+    type MirrorHandler = Error.Mirror
+    type StorageHandler = Error.Storage
+
+    implicit def mirror: MirrorHandler = Error.Mirror()
+    implicit def storage: StorageHandler = Error.Storage()
+  }
+
+  object Mirror {
+    trait Types extends leon.model.slice.Mirror.Types with Uri.Types {
+      final type Mirror = app.Mirror
+    }
+
+    import shapeless.syntax.singleton.mkSingletonOps
+    val mostlyOk = "mostlyOk".narrow
+    val fromHell = "fromHell".narrow
+  }
   final case class Mirror() extends leon.model.mirror.Mirror {
     import leon.model.mirror
 
-    type Handler = Types.mirror.Handler
-    type Prefix = String
-
-    private[this] object handlers {
-      trait Base extends leon.model.mirror.Handler with BaseHandler {
-        final type Request = Types.uri.Uri
+    object Handler {
+      trait Types {
+        final type Request = Uri.Types.Uri
         final type Result = leon.model.mirror.HandlingResult
+      }
+      object Types extends Types
 
+      trait Base extends leon.model.mirror.Handler with Types with BaseHandler {
         def success: Application.Uri ⇒ Future[Result] =
           request ⇒
             Future successful mirror.HandlingResult.Found {
@@ -131,22 +118,30 @@ object Application {
                 .convertTo[Array[Byte]]
                 .convertTo[ReadableByteChannel]
             }
-
       }
 
       trait Loki extends Base with LokiHandler
       trait Crappy extends Base with CrappyHandler
 
-      final case object Crappy extends Crappy
-      final case object Loki extends Loki
+      def Crappy: Crappy = new Crappy {}
+      def Loki: Loki = new Loki {}
     }
 
+    type Handler = Handler.Base
+    type Prefix = String
+
+    import Mirror.{ mostlyOk, fromHell }
     def apply(prefix: Prefix): Future[Handler] = Future successful prefix map {
-      case "mostylOk" ⇒ handlers.Crappy
-      case "fromhell" ⇒ handlers.Loki
+      case `mostlyOk` ⇒ Handler.Crappy
+      case `fromHell` ⇒ Handler.Loki
     }
   }
 
+  object Storage {
+    trait Types extends leon.model.slice.Storage.Types with Uri.Types {
+      final type Storage = app.Storage
+    }
+  }
   final case class Storage() extends leon.model.storage.Storage {
     import model.storage
 
@@ -168,54 +163,58 @@ object Application {
     }
   }
 
+  final case class ExecutionContexts() extends leon.model.facade.ExecutionContexts {
+    import isi.std.conversions._
+    implicit val RequestProcessing: ExecutionContext =
+      // these two options create some weird deadlock
+      //java.util.concurrent.Executors.newFixedThreadPool(16)
+      //java.util.concurrent.Executors.newSingleThreadExecutor()
+      java.util.concurrent.Executors.newWorkStealingPool(16)
+  }
+
   trait Slices extends AnyRef
-      with Types.mirror
-      with Types.storage
       with leon.model.slice.Mirror
+      with Mirror.Types
       with leon.model.slice.Storage
-      with leon.model.slice.Error {
+      with Storage.Types
+      with leon.model.slice.Error
+      with Error.Types {
     val Mirror = Application.Mirror()
     val Storage = Application.Storage()
-
-    /**
-     * As seen from class Leon, the missing signatures are as follows.
-     *  For convenience, these are usable as stub implementations.
-     */
-    // Members declared in gv.jleon2.model.slice.Error
-    val Error = ???
-
-    // Members declared in gv.jleon2.model.JLeon
-    val ExecutionContexts = ???
+    val Error = Application.Error()
+    val ExecutionContexts = Application.ExecutionContexts()
   }
-  //
-  //  final case class Error() extends leon.model.error.Error {
-  //    type Storage
-  //    type Mirror = this.type
-  //    type Uri = this.type
-  //
-  //    type MirrorHandler = this.type
-  //    type StorageHandler = this.type
-  //
-  //    def mirror: Error.this.type = ???
-  //
-  //    def storage: Error.this.type = ???
-  //
-  //  }
 
-  final case class Leon() extends leon.model.JLeon with Slices {
-  }
+  final case class Leon() extends leon.model.JLeon with Slices
 
   def main(args: Array[String]): Unit = {
 
+    object main extends StrictLogging {
+      val Logger = logger
+    }
+    import main.{ Logger ⇒ logger }
+
+    logger info s"creating leon"
     val leon = new Leon
+
     val maximumPatience = duration.Duration(3, duration.SECONDS)
+    logger info s"setting maximum patience to $maximumPatience"
+
+    logger info "creating the future"
     val futureResult = {
-      val uri = Uri("/bohos/me/a/las/rajas", boundToFail = true)
-      val prefix = "bohos"
-      leon serveRequest (prefix, uri)
+      val uri = Uri("/bohos/me/a/las/rajas", boundToFail = false)
+      logger info s"uri set to $uri"
+
+      val prefix = Mirror.mostlyOk
+      logger info s"prefix set to $prefix"
+
+      logger info "going for serverRequest..."
+      leon serveRequest (prefix, uri) andThen { case a ⇒ println(a) }
     }
 
+    logger info "awaiting result to be ready (with maximum patience)"
     Await.ready(futureResult, maximumPatience)
+    logger info "result was ready"
   }
 
 }

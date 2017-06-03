@@ -12,8 +12,6 @@ import scalaz.{ Monad }
 trait Error {
   // format: OFF
   this: Any
-    with slice.Mirror.Types
-    with slice.Storage.Types
   ⇒
   // format: ON
 
