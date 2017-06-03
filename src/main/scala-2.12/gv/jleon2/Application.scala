@@ -19,203 +19,203 @@ import leon.model.facade.ExecutionContexts
 object Application {
   app ⇒
 
-  object Uri {
-    trait Types extends leon.model.slice.Uri.Types {
-      final type Uri = app.Uri
-    }
-    object Types extends Types
-  }
-  final case class Uri(uri: String, boundToFail: Boolean) {
-    import java.net.{ URI ⇒ Java }
-    import akka.http.scaladsl.model.{ Uri ⇒ Akka }
-    implicit def javaUri: Java = Java create uri
-    implicit def akkaUri: Akka = Akka apply uri
-
-    def map[S](f: Uri ⇒ S): S = f(this)
-    def future: Future[this.type] =
-      if (boundToFail)
-        Future failed new RuntimeException("Request was bound to fail")
-      else
-        Future successful this
-  }
-
-  trait BaseHandler {
-    // Input
-    type Request <: Application.Uri
-    // Output
-    type Result
-
-    val saveit: Boolean ⇒ Boolean
-    def success: Application.Uri ⇒ Future[Result]
-
-    def process[R <: Request]: R ⇒ Application.Uri =
-      req ⇒ req copy (boundToFail = saveit(req.boundToFail))
-
-    def handle(request: Request): Future[Result] =
-      process(request).future flatMap success
-  }
-  trait CrappyHandler {
-    this: BaseHandler ⇒
-    val saveit: Boolean ⇒ Boolean = Predef identity
-  }
-  trait LokiHandler {
-    this: BaseHandler ⇒
-    val saveit: Boolean ⇒ Boolean = !_
-  }
-
-  object Error {
-    final case class Mirror() extends leon.model.error.Mirror {
-      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
-        result
-    }
-    final case class Storage() extends leon.model.error.Storage {
-      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
-        result
-    }
-    trait Types extends leon.model.slice.Error.Types {
-      final type Error = app.Error
-    }
-    object Types extends Types
-  }
-
-  final case class Error() extends leon.model.error.Error {
-    type MirrorHandler = Error.Mirror
-    type StorageHandler = Error.Storage
-
-    implicit def mirror: MirrorHandler = Error.Mirror()
-    implicit def storage: StorageHandler = Error.Storage()
-  }
-
-  object Mirror {
-    trait Types extends leon.model.slice.Mirror.Types with Uri.Types {
-      final type Mirror = app.Mirror
-    }
-
-    import shapeless.syntax.singleton.mkSingletonOps
-    val mostlyOk = "mostlyOk".narrow
-    val fromHell = "fromHell".narrow
-  }
-  final case class Mirror() extends leon.model.mirror.Mirror {
-    import leon.model.mirror
-
-    object Handler {
-      trait Types {
-        final type Request = Uri.Types.Uri
-        final type Result = leon.model.mirror.HandlingResult
-      }
-      object Types extends Types
-
-      trait Base extends leon.model.mirror.Handler with Types with BaseHandler {
-        def success: Application.Uri ⇒ Future[Result] =
-          request ⇒
-            Future successful mirror.HandlingResult.Found {
-              import isi.convertible._
-              import isi.std.conversions._
-              import isi.std.io.ByteSource._
-              import java.nio.channels.ReadableByteChannel
-
-              s"Hello Bob ${request}"
-                .convertTo[Array[Byte]]
-                .convertTo[ReadableByteChannel]
-            }
-      }
-
-      trait Loki extends Base with LokiHandler
-      trait Crappy extends Base with CrappyHandler
-
-      def Crappy: Crappy = new Crappy {}
-      def Loki: Loki = new Loki {}
-    }
-
-    type Handler = Handler.Base
-    type Prefix = String
-
-    import Mirror.{ mostlyOk, fromHell }
-    def apply(prefix: Prefix): Future[Handler] = Future successful prefix map {
-      case `mostlyOk` ⇒ Handler.Crappy
-      case `fromHell` ⇒ Handler.Loki
-    }
-  }
-
-  object Storage {
-    trait Types extends leon.model.slice.Storage.Types with Uri.Types {
-      final type Storage = app.Storage
-    }
-  }
-  final case class Storage() extends leon.model.storage.Storage {
-    import model.storage
-
-    type Request = Uri
-    type LockResult = storage.LockResult
-
-    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
-      request ⇒
-        Future successful storage.LockResult.Acquired(new WritableByteChannel {
-          def write(src: ByteBuffer): Int = {
-            println(s"$request: hahahaha: ${src.toString}")
-            val written = src.remaining() + 1
-            src.position(src.limit())
-            written
-          }
-          def isOpen: Boolean = true
-          def close(): Unit = ()
-        })
-    }
-  }
-
-  final case class ExecutionContexts() extends leon.model.facade.ExecutionContexts {
-    import isi.std.conversions._
-    implicit val RequestProcessing: ExecutionContext =
-      // these two options create some weird deadlock
-      //java.util.concurrent.Executors.newFixedThreadPool(16)
-      //java.util.concurrent.Executors.newSingleThreadExecutor()
-      java.util.concurrent.Executors.newWorkStealingPool(16)
-  }
-
-  trait Slices extends AnyRef
-      with leon.model.slice.Mirror
-      with Mirror.Types
-      with leon.model.slice.Storage
-      with Storage.Types
-      with leon.model.slice.Error
-      with Error.Types {
-    val Mirror = Application.Mirror()
-    val Storage = Application.Storage()
-    val Error = Application.Error()
-    val ExecutionContexts = Application.ExecutionContexts()
-  }
-
-  final case class Leon() extends leon.model.JLeon with Slices
-
-  def main(args: Array[String]): Unit = {
-
-    object main extends StrictLogging {
-      val Logger = logger
-    }
-    import main.{ Logger ⇒ logger }
-
-    logger info s"creating leon"
-    val leon = new Leon
-
-    val maximumPatience = duration.Duration(3, duration.SECONDS)
-    logger info s"setting maximum patience to $maximumPatience"
-
-    logger info "creating the future"
-    val futureResult = {
-      val uri = Uri("/bohos/me/a/las/rajas", boundToFail = false)
-      logger info s"uri set to $uri"
-
-      val prefix = Mirror.mostlyOk
-      logger info s"prefix set to $prefix"
-
-      logger info "going for serverRequest..."
-      leon serveRequest (prefix, uri) andThen { case a ⇒ println(a) }
-    }
-
-    logger info "awaiting result to be ready (with maximum patience)"
-    Await.ready(futureResult, maximumPatience)
-    logger info "result was ready"
-  }
+//  object Uri {
+//    trait Types extends leon.model.slice.Uri.Types {
+//      final type Uri = app.Uri
+//    }
+//    object Types extends Types
+//  }
+//  final case class Uri(uri: String, boundToFail: Boolean) {
+//    import java.net.{ URI ⇒ Java }
+//    import akka.http.scaladsl.model.{ Uri ⇒ Akka }
+//    implicit def javaUri: Java = Java create uri
+//    implicit def akkaUri: Akka = Akka apply uri
+//
+//    def map[S](f: Uri ⇒ S): S = f(this)
+//    def future: Future[this.type] =
+//      if (boundToFail)
+//        Future failed new RuntimeException("Request was bound to fail")
+//      else
+//        Future successful this
+//  }
+//
+//  trait BaseHandler {
+//    // Input
+//    type Request <: Application.Uri
+//    // Output
+//    type Result
+//
+//    val saveit: Boolean ⇒ Boolean
+//    def success: Application.Uri ⇒ Future[Result]
+//
+//    def process[R <: Request]: R ⇒ Application.Uri =
+//      req ⇒ req copy (boundToFail = saveit(req.boundToFail))
+//
+//    def handle(request: Request): Future[Result] =
+//      process(request).future flatMap success
+//  }
+//  trait CrappyHandler {
+//    this: BaseHandler ⇒
+//    val saveit: Boolean ⇒ Boolean = Predef identity
+//  }
+//  trait LokiHandler {
+//    this: BaseHandler ⇒
+//    val saveit: Boolean ⇒ Boolean = !_
+//  }
+//
+//  object Error {
+//    final case class Mirror() extends leon.model.error.Mirror {
+//      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
+//        result
+//    }
+//    final case class Storage() extends leon.model.error.Storage {
+//      def apply[F[_]: Monad, Result](result: F[Result]): F[Result] =
+//        result
+//    }
+//    trait Types extends leon.model.slice.Error.Types {
+//      final type Error = app.Error
+//    }
+//    object Types extends Types
+//  }
+//
+//  final case class Error() extends leon.model.error.Error {
+//    type MirrorHandler = Error.Mirror
+//    type StorageHandler = Error.Storage
+//
+//    implicit def mirror: MirrorHandler = Error.Mirror()
+//    implicit def storage: StorageHandler = Error.Storage()
+//  }
+//
+//  object Mirror {
+//    trait Types extends leon.model.slice.Mirror.Types with Uri.Types {
+//      final type Mirror = app.Mirror
+//    }
+//
+//    import shapeless.syntax.singleton.mkSingletonOps
+//    val mostlyOk = "mostlyOk".narrow
+//    val fromHell = "fromHell".narrow
+//  }
+//  final case class Mirror() extends leon.model.mirror.Mirror {
+//    import leon.model.mirror
+//
+//    object Handler {
+//      trait Types {
+//        final type Request = Uri.Types.Uri
+//        final type Result = leon.model.mirror.HandlingResult
+//      }
+//      object Types extends Types
+//
+//      trait Base extends leon.model.mirror.Handler with Types with BaseHandler {
+//        def success: Application.Uri ⇒ Future[Result] =
+//          request ⇒
+//            Future successful mirror.HandlingResult.Found {
+//              import isi.convertible._
+//              import isi.std.conversions._
+//              import isi.std.io.ByteSource._
+//              import java.nio.channels.ReadableByteChannel
+//
+//              s"Hello Bob ${request}"
+//                .convertTo[Array[Byte]]
+//                .convertTo[ReadableByteChannel]
+//            }
+//      }
+//
+//      trait Loki extends Base with LokiHandler
+//      trait Crappy extends Base with CrappyHandler
+//
+//      def Crappy: Crappy = new Crappy {}
+//      def Loki: Loki = new Loki {}
+//    }
+//
+//    type Handler = Handler.Base
+//    type Prefix = String
+//
+//    import Mirror.{ mostlyOk, fromHell }
+//    def apply(prefix: Prefix): Future[Handler] = Future successful prefix map {
+//      case `mostlyOk` ⇒ Handler.Crappy
+//      case `fromHell` ⇒ Handler.Loki
+//    }
+//  }
+//
+//  object Storage {
+//    trait Types extends leon.model.slice.Storage.Types with Uri.Types {
+//      final type Storage = app.Storage
+//    }
+//  }
+//  final case class Storage() extends leon.model.storage.Storage {
+//    import model.storage
+//
+//    type Request = Uri
+//    type LockResult = storage.LockResult
+//
+//    def tryLock(request: Request): Future[LockResult] = Future successful request flatMap {
+//      request ⇒
+//        Future successful storage.LockResult.Acquired(new WritableByteChannel {
+//          def write(src: ByteBuffer): Int = {
+//            println(s"$request: hahahaha: ${src.toString}")
+//            val written = src.remaining() + 1
+//            src.position(src.limit())
+//            written
+//          }
+//          def isOpen: Boolean = true
+//          def close(): Unit = ()
+//        })
+//    }
+//  }
+//
+//  final case class ExecutionContexts() extends leon.model.facade.ExecutionContexts {
+//    import isi.std.conversions._
+//    implicit val RequestProcessing: ExecutionContext =
+//      // these two options create some weird deadlock
+//      //java.util.concurrent.Executors.newFixedThreadPool(16)
+//      //java.util.concurrent.Executors.newSingleThreadExecutor()
+//      java.util.concurrent.Executors.newWorkStealingPool(16)
+//  }
+//
+//  trait Slices extends AnyRef
+//      with leon.model.slice.Mirror
+//      with Mirror.Types
+//      with leon.model.slice.Storage
+//      with Storage.Types
+//      with leon.model.slice.Error
+//      with Error.Types {
+//    val Mirror = Application.Mirror()
+//    val Storage = Application.Storage()
+//    val Error = Application.Error()
+//    val ExecutionContexts = Application.ExecutionContexts()
+//  }
+//
+//  final case class Leon() extends leon.model.JLeon with Slices
+//
+//  def main(args: Array[String]): Unit = {
+//
+//    object main extends StrictLogging {
+//      val Logger = logger
+//    }
+//    import main.{ Logger ⇒ logger }
+//
+//    logger info s"creating leon"
+//    val leon = new Leon
+//
+//    val maximumPatience = duration.Duration(3, duration.SECONDS)
+//    logger info s"setting maximum patience to $maximumPatience"
+//
+//    logger info "creating the future"
+//    val futureResult = {
+//      val uri = Uri("/bohos/me/a/las/rajas", boundToFail = false)
+//      logger info s"uri set to $uri"
+//
+//      val prefix = Mirror.mostlyOk
+//      logger info s"prefix set to $prefix"
+//
+//      logger info "going for serverRequest..."
+//      leon serveRequest (prefix, uri) andThen { case a ⇒ println(a) }
+//    }
+//
+//    logger info "awaiting result to be ready (with maximum patience)"
+//    Await.ready(futureResult, maximumPatience)
+//    logger info "result was ready"
+//  }
 
 }
 

@@ -28,37 +28,43 @@ trait JLeon extends AnyRef {
     val storage = Error.storage
   }
 
+  val Mirror = {
+    import slice.{ Mirror ⇒ smirror }
+    smirror.this.Mirror
+  }
+
   def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {
-    import ExecutionContexts.RequestProcessing
-    //    import concurrent.ExecutionContext.Implicits.global
-    import mirror.HandlingResult.{ Found ⇒ MirrorFound }
-    import storage.LockResult.{ Acquired ⇒ StorageAcquired, Found ⇒ StorageFound }
-
-    object future {
-      val mirror = {
-        Mirror(prefix)
-          .flatMap { _ handle request }
-          .withErrorHandledBy(error.mirror)
-      }
-      val lock: Future[Storage.LockResult] =
-        Storage tryLock request withErrorHandledBy error.storage
-    }
-
-    future.mirror zip future.lock andThen {
-      case Success((_, StorageFound(rchannel))) ⇒
-        rchannel
-      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
-        rchannel
-      case Failure(ex) ⇒
-        println {
-          s"""
-             | Failure: $ex
-           """
-        }
-        ex.printStackTrace()
-    } map {
-      _ ⇒ ()
-    }
+//    import ExecutionContexts.RequestProcessing
+//    //    import concurrent.ExecutionContext.Implicits.global
+//    import mirror.HandlingResult.{ Found ⇒ MirrorFound }
+//    import storage.LockResult.{ Acquired ⇒ StorageAcquired, Found ⇒ StorageFound }
+//
+//    object future {
+//      val mirror = {
+//        Mirror(prefix)
+//          .flatMap { _ handle request }
+//          .withErrorHandledBy(error.mirror)
+//      }
+//      val lock: Future[Storage.LockResult] =
+//        Storage tryLock request withErrorHandledBy error.storage
+//    }
+//
+//    future.mirror zip future.lock andThen {
+//      case Success((_, StorageFound(rchannel))) ⇒
+//        rchannel
+//      case Success((MirrorFound(rchannel), StorageAcquired(lockChannel))) ⇒
+//        rchannel
+//      case Failure(ex) ⇒
+//        println {
+//          s"""
+//             | Failure: $ex
+//           """
+//        }
+//        ex.printStackTrace()
+//    } map {
+//      _ ⇒ ()
+//    }
+    ???
   }
 
 }

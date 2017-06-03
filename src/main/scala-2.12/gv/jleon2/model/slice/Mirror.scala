@@ -10,7 +10,9 @@ object Mirror {
   trait Types extends Any
       with slice.Uri.Types {
 
-    type Mirror <: mirror.Mirror {
+    type Factory <: mirror.RepositoryFactory
+
+    type Mirror <: Factory#Repository {
       // Outputs
       type Handler <: mirror.Handler {
         // Inputs
