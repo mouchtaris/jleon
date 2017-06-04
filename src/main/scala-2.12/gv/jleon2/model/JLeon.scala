@@ -28,12 +28,7 @@ trait JLeon extends AnyRef {
     val storage = Error.storage
   }
 
-  val Mirror = {
-    import slice.{ Mirror ⇒ smirror }
-    smirror.this.Mirror
-  }
-
-  def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {
+//  def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {
 //    import ExecutionContexts.RequestProcessing
 //    //    import concurrent.ExecutionContext.Implicits.global
 //    import mirror.HandlingResult.{ Found ⇒ MirrorFound }
@@ -64,7 +59,7 @@ trait JLeon extends AnyRef {
 //    } map {
 //      _ ⇒ ()
 //    }
-    ???
-  }
+//    ???
+//  }
 
 }

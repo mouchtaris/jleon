@@ -1,17 +1,20 @@
-package gv.isi
+package gv
+package isi
 package std.conversions
 
 import scala.language.{ implicitConversions }
 import scala.util.{ Try, Success, Failure }
+
+import convertible.{ ~=> }
 
 /**
  * Provide conversions from standard type to [[scala.util.Try]].
  */
 trait ToTryConversions extends Any {
 
-  final implicit def fromOption[T](opt: Option[T]): Try[T] = opt match {
+  final implicit def `Option[T] ~=> Try[T]`[T]: Option[T] ~=> Try[T] = {
     case Some(v) ⇒ Success(v)
-    case None    ⇒ Failure(new NoSuchElementException("Option.None"))
+    case None ⇒ Failure(new NoSuchElementException("Option.None"))
   }
 
 }

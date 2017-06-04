@@ -27,7 +27,7 @@ trait ReadCompletely[T] extends Any {
 
     val content: String = if (scanner.hasNext()) scanner.next() else ""
 
-    content.convertTo[ByteBuffer]
+    content.convertTo[Array[Byte]].convertTo[ByteBuffer]
   }
 
 }
