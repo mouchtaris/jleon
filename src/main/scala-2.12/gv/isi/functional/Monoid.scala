@@ -1,4 +1,5 @@
-package gv.jleon
+package gv
+package isi
 package functional
 
 trait Monoid[T] extends Any {

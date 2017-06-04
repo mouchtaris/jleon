@@ -1,4 +1,5 @@
-package gv.jleon
+package gv
+package isi
 
 import language.higherKinds
 

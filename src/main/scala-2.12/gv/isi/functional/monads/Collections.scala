@@ -1,4 +1,5 @@
-package gv.jleon
+package gv
+package isi
 package functional
 package monads
 
@@ -7,8 +8,6 @@ import collection.{ GenTraversable, mutable }
 import collection.generic.{ GenericCompanion, CanBuildFrom }
 
 trait Collections {
-  import gv.jleon.functional.{ MonadOps ⇒ _ }
-
   final implicit def canBuildFromWithCompanion[S[T] <: GenTraversable[T], A, B](implicit companion: GenericCompanion[S]): CanBuildFrom[GenTraversable[A], B, S[B]] =
     new CanBuildFrom[GenTraversable[A], B, S[B]] {
       override def apply(from: GenTraversable[A]): mutable.Builder[B, S[B]] = companion.newBuilder

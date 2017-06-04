@@ -1,7 +1,7 @@
 package gv
 package jleon
 
-import functional._
+import isi.functional._
 //
 //object leon {
 //  import java.net.URI
