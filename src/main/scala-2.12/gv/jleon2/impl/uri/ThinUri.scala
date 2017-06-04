@@ -9,8 +9,8 @@ import java.net.{ URI ⇒ Java }
 import akka.http.scaladsl.model.{ Uri ⇒ Akka }
 
 /**
-  * A thin Uri wrapper than can be any library provided URI.
-  */
+ * A thin Uri wrapper than can be any library provided URI.
+ */
 final case class ThinUri(uri: String)
 
 object ThinUri {

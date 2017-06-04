@@ -14,7 +14,7 @@ trait ToTryConversions extends Any {
 
   final implicit def `Option[T] ~=> Try[T]`[T]: Option[T] ~=> Try[T] = {
     case Some(v) ⇒ Success(v)
-    case None ⇒ Failure(new NoSuchElementException("Option.None"))
+    case None    ⇒ Failure(new NoSuchElementException("Option.None"))
   }
 
 }
