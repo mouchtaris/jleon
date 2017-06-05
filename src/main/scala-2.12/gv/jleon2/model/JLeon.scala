@@ -15,17 +15,14 @@ import error.Error.WithErrorHandling
 trait JLeon extends AnyRef {
   // format: OFF
   this: AnyRef
-    with slice.Storage
-    with slice.Mirror
-    with slice.Error
   ⇒
   // format: ON
 
   val ExecutionContexts: facade.ExecutionContexts
 
   object error {
-    val mirror = Error.mirror
-    val storage = Error.storage
+//    val mirror = Error.mirror
+//    val storage = Error.storage
   }
 
   //  def serveRequest(prefix: Mirror.Prefix, request: Uri): Future[Unit] = {

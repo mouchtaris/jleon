@@ -19,6 +19,29 @@ import leon.model.facade.ExecutionContexts
 object Application {
   app ⇒
 
+  trait Mirror extends model.mirror.Mirror {
+    final type Prefix = String
+
+    val Handler: model.mirror.Handler.tp[Prefix, model.mirror.HandlingResult] = (_: String) ⇒ ??? //
+    final type Handler = Handler.type
+
+    val HandlerRepository: isi.Repository.tp[Prefix, Handler] = (_: String) ⇒ ??? //
+    final type HandlerRepository = HandlerRepository.type
+
+    val HandlerFactory: isi.Factory.tp[String, Handler] = (_: String) ⇒ ??? //
+    final type HandlerFactory = HandlerFactory.type
+
+    val HandlerRepositoryFactory: isi.Factory.tp[String, HandlerRepository] = (_: String) ⇒ ??? //
+    final type HandlerRepositoryFactory = HandlerRepositoryFactory.type
+  }
+
+  val Mirror = new Mirror { }
+
+  Mirror.Handler("hello").value match {
+    case Some(util.Success(model.mirror.HandlingResult.Found(rch))) ⇒
+      rch.read(null)
+  }
+
   //  object Uri {
   //    trait Types extends leon.model.slice.Uri.Types {
   //      final type Uri = app.Uri

@@ -1,16 +1,27 @@
-package gv.jleon2
-package model
-package mirror
+package gv
+package jleon2
+package model.mirror
 
 import concurrent.{ Future }
 
-trait Handler {
+trait Handler extends isi.Function with Handler.Types {
+  final type FunctionIn = Request
+  final type FunctionOut = Future[Result]
+}
 
-  // Inputs
-  type Request
+object Handler {
 
-  // Outputs
-  type Result <: HandlingResult
+  trait Types {
+    // Input
+    type Request
 
-  def handle(request: Request): Future[Result]
+    // Output
+    type Result <: HandlingResult
+  }
+
+  trait tp[request, result <: HandlingResult] extends Handler {
+    final type Request = request
+    final type Result = result
+  }
+
 }
