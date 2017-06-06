@@ -6,7 +6,7 @@ import concurrent.{ Future }
 import util.{ Success, Failure }
 
 import akka.http.{ scaladsl ⇒ http }
-import akka.stream.{scaladsl ⇒ stream}
+import akka.stream.{ scaladsl ⇒ stream }
 
 import http.model.{ Uri, HttpRequest }
 
@@ -14,17 +14,16 @@ import model.mirror.{ HandlingResult }
 
 final case class AkkaHttpHandler(
   implicit
-  akkaHttp: http.HttpExt,
+  akkaHttp:     http.HttpExt,
   materializer: akka.stream.Materializer,
-  ec: AkkaHttpHandler.ExecutionContext
+  ec:           AkkaHttpHandler.ExecutionContext
 ) extends model.mirror.Handler
-  with AkkaHttpHandler.Types {
+    with AkkaHttpHandler.Types {
 
   import http.client.RequestBuilding
 
   @inline
-  private[this]
-  def request(implicit uri: Uri): HttpRequest = RequestBuilding Get uri
+  private[this] def request(implicit uri: Uri): HttpRequest = RequestBuilding Get uri
 
   def apply(uri: Uri): Future[Result] = {
     implicit val _uri = uri
@@ -36,7 +35,8 @@ final case class AkkaHttpHandler(
     }
     val f3: Future[java.nio.channels.ReadableByteChannel] = f2 map { bytestring ⇒
       new java.nio.channels.ReadableByteChannel {
-        /** As seen from <$anon: java.nio.channels.ReadableByteChannel>, the missing signatures are as follows.
+        /**
+         * As seen from <$anon: java.nio.channels.ReadableByteChannel>, the missing signatures are as follows.
          *  For convenience, these are usable as stub implementations.
          */
         // Members declared in java.nio.channels.Channel
@@ -46,7 +46,7 @@ final case class AkkaHttpHandler(
 
         // Members declared in java.nio.channels.ReadableByteChannel
         def read(src: java.nio.ByteBuffer): Int = {
-
+          
           ???
         }
       }

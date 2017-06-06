@@ -35,7 +35,7 @@ object Application {
     final type HandlerRepositoryFactory = HandlerRepositoryFactory.type
   }
 
-  val Mirror = new Mirror { }
+  val Mirror = new Mirror {}
 
   Mirror.Handler("hello").value match {
     case Some(util.Success(model.mirror.HandlingResult.Found(rch))) ⇒
