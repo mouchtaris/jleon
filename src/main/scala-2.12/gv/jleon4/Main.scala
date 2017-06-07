@@ -142,7 +142,7 @@ trait StorageMapPackage {
       type Base <: JPath
       def base: Base
 
-      final class ForItem(item: String) {
+      final class ForItem(val item: String) {
         val storage: JPath = base resolve item
         val lock: JPath = storage addExt EXT_LOCK
         val failure: JPath = storage addExt EXT_FAILURE
@@ -163,19 +163,114 @@ trait StorageMapInterpretationsPackage extends Any {
     with StorageMapPackage
   ⇒
 
-  implicit def recordStorageMap[base: CouldBe[JPath]#t, rec <: HList]: StorageMap[base :: rec] = self ⇒ new StorageMap.Ops {
+  implicit def recordStorageMap[
+    base: CouldBe[JPath]#t,
+    rec <: HList
+  ]: StorageMap[base :: rec] = self ⇒ new StorageMap.Ops {
     final type Base = JPath
-    val (base: Base) :: _ = self
+    final val baseSource :: _ = self
+    final val base: Base = baseSource
   }
 }
+
+trait StoragePackage {
+  this: Any
+    with Util
+    with TypeClassPackage
+    with StorageMapPackage
+  ⇒
+
+  sealed trait LockResult
+  final object LockResult {
+    case class Acquired(channel: WritableByteChannel) extends LockResult
+    case class Found(channel: ReadableByteChannel) extends LockResult
+
+    case class Locked(item: String, cause: FileAlreadyExistsException)
+      extends Exception(s"item is locked: $item", cause) with LockResult
+
+    case class Failed(item: String)
+      extends Exception(s"item is failed: $item") with LockResult
+  }
+
+  trait Storage[-T] extends TypeClass.WithTypeParams[T, Storage.Ops]
+
+  object Storage extends TypeClassCompanion[Storage] {
+
+    val nothing: Try[LockResult] = Failure(new Exception("nothing happened yet"))
+
+    trait Ops {
+      import java.nio.file.{ Files, StandardOpenOption ⇒ oopt }
+
+      type StorageMap <: StoragePackage.this.StorageMap.Ops
+      def storageMap: StorageMap
+
+      final class ForItem(item: String) {
+        val map = storageMap(item)
+
+        val getFailure: Try[LockResult] =
+          if (Files exists map.failure)
+            Success(LockResult.Failed(map.item))
+          else
+            Failure(new NoSuchFileException(map.failure.toString))
+
+        val getLock: Try[LockResult] = Try {
+          Files newByteChannel (map.lock, oopt.CREATE_NEW, oopt.WRITE) close ()
+        } map { _ ⇒
+          Files newByteChannel (map.storage, oopt.CREATE_NEW, oopt.WRITE)
+        } map {
+          LockResult.Acquired.apply
+        } recover {
+          case ex: FileAlreadyExistsException ⇒ LockResult.Locked(map.item, ex)
+        }
+
+        val getStorage: Try[LockResult] = Try {
+          Files newByteChannel (map.storage, oopt.READ)
+        } map {
+          LockResult.Found.apply
+        }
+
+        val tryLock: Try[LockResult] =
+          nothing recoverWith pf(getFailure) recoverWith pf(getLock) recoverWith pf(getStorage)
+      }
+
+      final def apply(item: String): ForItem = new ForItem(item)
+
+      final val tryLock: String ⇒ Try[LockResult] = apply _ andThen (_.tryLock)
+    }
+  }
+
+  implicit def storageOps[T: Storage](self: T): Storage.Ops = Storage[T](self)
+
+}
+
+trait StorageInterpretationsPackage {
+  this: Any
+    with Util
+    with StorageMapPackage
+    with StoragePackage
+  ⇒
+
+  implicit def recordStorage[
+    storageMap: CouldBe[StorageMap.Ops]#t,
+    rec <: HList
+  ]: Storage[storageMap :: rec] = self ⇒ new Storage.Ops {
+    final type StorageMap = StorageMap.Ops
+    final val storageMapSource :: _ = self
+    final val storageMap: StorageMap = storageMapSource
+  }
+
+}
+
 
 trait StorageFactoryPackage {
   this: Any
     with ConfigPackage
     with Util
-    with StorageMapPackage
     with TypeClassPackage
+    with StorageMapPackage
     with StorageMapInterpretationsPackage
+    with StoragePackage
+    with StorageInterpretationsPackage
   ⇒
 
   trait StorageFactory[-T] extends Any with TypeClass.WithTypeParams[T, StorageFactory.Ops]
@@ -190,6 +285,10 @@ trait StorageFactoryPackage {
 
       final def storageMap = couldBe[StorageMap.Ops] {
         (config getUri "basePath") :: HNil
+      }
+
+      final def storage = couldBe[Storage.Ops] {
+        storageMap :: HNil
       }
     }
 
@@ -207,12 +306,14 @@ trait StorageFactoryInterpretationsPackage extends Any {
     with StorageFactoryPackage
   ⇒
 
-  implicit def recordStorageFactory[config: CouldBe[Config.Ops]#t, rec <: HList]: StorageFactory[config :: HNil] = self ⇒ new StorageFactory.Ops {
+  implicit def recordStorageFactory[config: CouldBe[Config.Ops]#t, rec <: HList]: StorageFactory[config :: rec] = self ⇒ new StorageFactory.Ops {
     final type Config = StorageFactoryInterpretationsPackage.this.Config.Ops
-    final val (config: Config) :: _ = self
+    final val configSource :: _ = self
+    final val config: Config = configSource
   }
 
 }
+
 
 object Main extends AnyRef
   with StrictLogging
@@ -225,6 +326,8 @@ object Main extends AnyRef
   with StorageMapInterpretationsPackage
   with StorageFactoryPackage
   with StorageFactoryInterpretationsPackage
+  with StoragePackage
+  with StorageInterpretationsPackage
 {
   app ⇒
   import PathInterpretationsPackage._
@@ -239,15 +342,13 @@ object Main extends AnyRef
     private[this] val storageConfig = couldBe[Config.Ops] { (config.config getConfig "storage") :: fileSystem :: HNil }
 
     val storageFactory = couldBe[StorageFactory.Ops] { storageConfig :: HNil }
-
-    val storageMap = couldBe[StorageMap.Ops] { storageFactory.storageMap }
   }
 
   final case class Main() {
     val factory: Factory = Factory()
   }
 
-  def main(args: Array[String]): Unit = {
+  def randomTest(): Unit = {
 
     val path = java.nio.file.Paths.get("hibob")
     val smap = path :: HNil
@@ -262,9 +363,19 @@ object Main extends AnyRef
     println(ops2(self2).getUri("jleon.storage.basePath"))
 
     println {
-      val bobo = Main().factory.storageMap("bobos")
+      val bobo = Main().factory.storageFactory.storageMap("bobo")
       import bobo._
       (lock, failure, storage)
+    }
+
+  }
+
+  def main(args: Array[String]): Unit = {
+    val main = Main()
+    val sto = main.factory.storageFactory.storage
+
+    println {
+      (1 to 2) map (_ ⇒ sto.tryLock("mani"))
     }
   }
 
