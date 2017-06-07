@@ -10,7 +10,6 @@ trait Client extends AnyRef with Client.Types {
 
 }
 
-
 object Client {
   trait Types extends Any {
     type Uri <: model.uri.Uri

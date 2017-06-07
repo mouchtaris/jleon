@@ -8,8 +8,8 @@ import concurrent.{ Future, ExecutionContext }
 
 import java.nio.{ ByteBuffer }
 
-import akka.stream.{scaladsl ⇒ stream}
-import akka.http.{scaladsl ⇒ http}
+import akka.stream.{ scaladsl ⇒ stream }
+import akka.http.{ scaladsl ⇒ http }
 import akka.util.{ ByteString }
 
 object Akka {
@@ -28,7 +28,7 @@ object Akka {
     final case class Response(response: http.model.HttpResponse) extends model.http.Response {
       val isSuccess: Try[Unit] = response.status match {
         case http.model.StatusCodes.Success(_) ⇒ Success(Unit)
-        case status ⇒ Failure(new Exception(status.toString))
+        case status                            ⇒ Failure(new Exception(status.toString))
       }
 
       val bytes: stream.Source[ByteBuffer, akka.NotUsed] = response.entity.dataBytes
@@ -45,7 +45,7 @@ object Akka {
     }
 
     final case class Client(implicit client: http.HttpExt, mat: akka.stream.Materializer) extends model.http.Client
-      with Types {
+        with Types {
 
       import http.client.{ RequestBuilding }
 

@@ -44,12 +44,12 @@ object Main extends StrictLogging {
     logger info "Creating Storage Factory"
     val storageFactory = StorageFactory(config)
 
-//    logger info "Importing Storage Components"
-//    import storageFactory.{
-//      storageMap,
-//      storage
-//    }
-//
+    //    logger info "Importing Storage Components"
+    //    import storageFactory.{
+    //      storageMap,
+    //      storage
+    //    }
+    //
     private[this] def logFutureCompletion[T](msg: String): T ⇒ T =
       result ⇒ { logger info msg; result; }
 
@@ -94,7 +94,7 @@ object Main extends StrictLogging {
     def addExt(ext: String): JPath = self resolveSibling s"${self.getFileName}.$ext"
   }
 
-  final case class StorageMap(base: JPath){
+  final case class StorageMap(base: JPath) {
     final case class forItem(item: String) {
       val storage: JPath = base resolveSibling item
       val lock: JPath = storage addExt StorageMap.EXT_LOCK
@@ -130,7 +130,7 @@ object Main extends StrictLogging {
     type StorageMap <: app.StorageMap
     val storageMap: StorageMap
 
-    private[this] type Map = storageMap.forItem
+    private[this]type Map = storageMap.forItem
 
     private[this] object withMap {
       val nothing: Try[LockResult] = Failure(new Exception("nothing done yet"))
@@ -138,10 +138,10 @@ object Main extends StrictLogging {
     }
 
     private[this] final case class withMap(map: Map) {
-      import withMap.{ pf , nothing }
+      import withMap.{ pf, nothing }
 
       val getLock: Try[LockResult] = Try {
-        Files newByteChannel(map.lock, oopt.CREATE_NEW) close()
+        Files newByteChannel (map.lock, oopt.CREATE_NEW) close ()
       } flatMap { _ ⇒
         Failure(new NoSuchFileException(map.lock.toString))
       } recover {
@@ -169,17 +169,17 @@ object Main extends StrictLogging {
   trait StorageFactory {
     type Config <: app.Config
     val config: Config
-//    require(Option(config).isDefined)
+    //    require(Option(config).isDefined)
     println(config)
-//
-//    final val storageMap: StorageMap = StorageMap(
-//      base = config.fileSystem.getPath("lol") // config path StorageFactory.BASE_PATH
-//    )
-//
-//    final val storage: Storage = new Storage with StoragePackage {
-//      final type StorageMap = app.StorageMap
-//      final val storageMap: StorageMap = StorageFactory.this.storageMap
-//    }
+    //
+    //    final val storageMap: StorageMap = StorageMap(
+    //      base = config.fileSystem.getPath("lol") // config path StorageFactory.BASE_PATH
+    //    )
+    //
+    //    final val storage: Storage = new Storage with StoragePackage {
+    //      final type StorageMap = app.StorageMap
+    //      final val storageMap: StorageMap = StorageFactory.this.storageMap
+    //    }
   }
   object StorageFactory {
     val BASE_PATH = "basePath"
@@ -201,7 +201,7 @@ object Main extends StrictLogging {
       } map { _ ⇒
         Main()
       } flatMap { main ⇒
-        main shutdown()
+        main shutdown ()
       } map { _ ⇒
         println("Byte byte leon")
       }

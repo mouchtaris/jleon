@@ -8,7 +8,6 @@ import java.nio.{ ByteBuffer }
 
 import akka.stream.scaladsl.{ Source }
 
-
 trait Handler extends isi.Function with Handler.Types {
   final type FunctionIn = Request
   final type FunctionOut = Source[ByteBuffer, Future[HandlingResult]]
