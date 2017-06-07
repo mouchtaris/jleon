@@ -22,7 +22,7 @@ object Application {
   trait Mirror extends model.mirror.Mirror {
     final type Prefix = String
 
-    val Handler: model.mirror.Handler.tp[Prefix, model.mirror.HandlingResult] = (_: String) ⇒ ??? //
+    val Handler: model.mirror.Handler.tp[Prefix] = (_: String) ⇒ ??? //
     final type Handler = Handler.type
 
     val HandlerRepository: isi.Repository.tp[Prefix, Handler] = (_: String) ⇒ ??? //
@@ -36,11 +36,6 @@ object Application {
   }
 
   val Mirror = new Mirror {}
-
-  Mirror.Handler("hello").value match {
-    case Some(util.Success(model.mirror.HandlingResult.Found(rch))) ⇒
-      rch.read(null)
-  }
 
   //  object Uri {
   //    trait Types extends leon.model.slice.Uri.Types {

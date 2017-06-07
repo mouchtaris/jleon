@@ -2,4 +2,12 @@ package gv
 package isi
 package convertible
 
-trait Conversion[A, B] extends (A ⇒ B)
+import language.{ implicitConversions }
+
+trait Conversion[A, B] {
+  def apply(a: A): B
+}
+
+object Conversion {
+  implicit def toFunction[A, B](conv: Conversion[A, B]): A ⇒ B = conv.apply
+}
