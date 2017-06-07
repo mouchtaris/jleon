@@ -13,6 +13,7 @@ object ImplicitResolutionOrder {
   trait P70 extends AnyRef with P60
     with ToFutureConversions
     with UriConversions
+    with PathConversions
   trait P80 extends AnyRef with P70
     with ExecutionContextConversions
     with ToTryConversions
