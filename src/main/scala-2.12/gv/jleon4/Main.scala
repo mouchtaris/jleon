@@ -31,7 +31,7 @@ import gv.{ jleon4 ⇒ app }
 trait Util {
   final def pf[T](t: ⇒ T): Any ~> T = { case _ ⇒ t }
   /** syntax-require: block is never run */
-  final def squire(t : ⇒ Any): Unit = ()
+  final def squire(t: ⇒ Any): Unit = ()
   final def couldBe[T] = new { def apply[U](u: U)(implicit ev: U ⇒ T): U = u }
   final type CouldBe[T] = { type t[a] = a ⇒ T }
   final type FactorySourceOf[T] = { type t[a] = a ⇒ T }
@@ -83,21 +83,25 @@ trait ConfigPackage {
 }
 
 trait ConfigInterpretationsPackage extends Any {
+  // format: OFF
   this: Any
     with Util
     with ConfigPackage
   ⇒
+  // format: ON
 
+  // format: OFF
   implicit def recordConfig[
     config: CouldBe[TSConfig]#t,
     fileSystem: CouldBe[JFileSystem]#t,
     rec <: HList
-    ]
-    : Config[config :: fileSystem :: rec] = self ⇒ new Config.Ops {
-      final type Config = TSConfig
-      final type FileSystem = JFileSystem
-      final val (config: Config) :: (fileSystem: FileSystem) :: _ = self
-    }
+  ]:
+  // format: ON
+  Config[config :: fileSystem :: rec] = self ⇒ new Config.Ops {
+    final type Config = TSConfig
+    final type FileSystem = JFileSystem
+    final val (config: Config) :: (fileSystem: FileSystem) :: _ = self
+  }
 
 }
 
@@ -158,15 +162,20 @@ trait StorageMapPackage {
 }
 
 trait StorageMapInterpretationsPackage extends Any {
+  // format: OFF
   this: Any
     with Util
     with StorageMapPackage
   ⇒
+  // format: ON
 
+  // format: OFF
   implicit def recordStorageMap[
     base: CouldBe[JPath]#t,
     rec <: HList
-  ]: StorageMap[base :: rec] = self ⇒ new StorageMap.Ops {
+  ]:
+  // format: ON
+  StorageMap[base :: rec] = self ⇒ new StorageMap.Ops {
     final type Base = JPath
     final val baseSource :: _ = self
     final val base: Base = baseSource
@@ -174,11 +183,13 @@ trait StorageMapInterpretationsPackage extends Any {
 }
 
 trait StoragePackage {
+  // format: OFF
   this: Any
     with Util
     with TypeClassPackage
     with StorageMapPackage
   ⇒
+  // format: ON
 
   sealed trait LockResult
   final object LockResult {
@@ -244,16 +255,21 @@ trait StoragePackage {
 }
 
 trait StorageInterpretationsPackage {
+  // format: OFF
   this: Any
     with Util
     with StorageMapPackage
     with StoragePackage
   ⇒
+  // format: ON
 
+  // format: OFF
   implicit def recordStorage[
     storageMap: CouldBe[StorageMap.Ops]#t,
     rec <: HList
-  ]: Storage[storageMap :: rec] = self ⇒ new Storage.Ops {
+  ]:
+  // format: ON
+  Storage[storageMap :: rec] = self ⇒ new Storage.Ops {
     final type StorageMap = StorageMap.Ops
     final val storageMapSource :: _ = self
     final val storageMap: StorageMap = storageMapSource
@@ -300,13 +316,21 @@ trait StorageFactoryPackage {
 }
 
 trait StorageFactoryInterpretationsPackage extends Any {
+  // format: OFF
   this: Any
     with Util
     with ConfigPackage
     with StorageFactoryPackage
   ⇒
+  // format: ON
 
-  implicit def recordStorageFactory[config: CouldBe[Config.Ops]#t, rec <: HList]: StorageFactory[config :: rec] = self ⇒ new StorageFactory.Ops {
+  // format: OFF
+  implicit def recordStorageFactory[
+    config: CouldBe[Config.Ops]#t,
+    rec <: HList
+  ]
+  // format: ON
+  : StorageFactory[config :: rec] = self ⇒ new StorageFactory.Ops {
     final type Config = StorageFactoryInterpretationsPackage.this.Config.Ops
     final val configSource :: _ = self
     final val config: Config = configSource
@@ -314,28 +338,26 @@ trait StorageFactoryInterpretationsPackage extends Any {
 
 }
 
-
 object Main extends AnyRef
-  with StrictLogging
-  with Util
-  with TypeClassPackage
-  with ConfigPackage
-  with ConfigInterpretationsPackage
-  with PathPackage
-  with StorageMapPackage
-  with StorageMapInterpretationsPackage
-  with StorageFactoryPackage
-  with StorageFactoryInterpretationsPackage
-  with StoragePackage
-  with StorageInterpretationsPackage
-{
+    with StrictLogging
+    with Util
+    with TypeClassPackage
+    with ConfigPackage
+    with ConfigInterpretationsPackage
+    with PathPackage
+    with StorageMapPackage
+    with StorageMapInterpretationsPackage
+    with StorageFactoryPackage
+    with StorageFactoryInterpretationsPackage
+    with StoragePackage
+    with StorageInterpretationsPackage {
   app ⇒
   import PathInterpretationsPackage._
 
   //noinspection TypeAnnotation
   final case class Factory(
-    tsconfig: TSConfig = TSConfigFactory.defaultApplication,
-    fileSystem: JFileSystem = java.nio.file.FileSystems.getDefault
+      tsconfig:   TSConfig    = TSConfigFactory.defaultApplication,
+      fileSystem: JFileSystem = java.nio.file.FileSystems.getDefault
   ) {
     private[this] val config = couldBe[Config.Ops] { (tsconfig getConfig "jleon") :: fileSystem :: HNil }
 
