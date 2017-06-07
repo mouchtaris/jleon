@@ -95,8 +95,7 @@ trait ConfigInterpretationsPackage extends Any {
     config: CouldBe[TSConfig]#t,
     fileSystem: CouldBe[JFileSystem]#t,
     rec <: HList
-  ]:
-  // format: ON
+  ]: // format: ON
   Config[config :: fileSystem :: rec] = self ⇒ new Config.Ops {
     final type Config = TSConfig
     final type FileSystem = JFileSystem
@@ -173,8 +172,7 @@ trait StorageMapInterpretationsPackage extends Any {
   implicit def recordStorageMap[
     base: CouldBe[JPath]#t,
     rec <: HList
-  ]:
-  // format: ON
+  ]: // format: ON
   StorageMap[base :: rec] = self ⇒ new StorageMap.Ops {
     final type Base = JPath
     final val baseSource :: _ = self
@@ -267,8 +265,7 @@ trait StorageInterpretationsPackage {
   implicit def recordStorage[
     storageMap: CouldBe[StorageMap.Ops]#t,
     rec <: HList
-  ]:
-  // format: ON
+  ]: // format: ON
   Storage[storageMap :: rec] = self ⇒ new Storage.Ops {
     final type StorageMap = StorageMap.Ops
     final val storageMapSource :: _ = self
@@ -277,8 +274,8 @@ trait StorageInterpretationsPackage {
 
 }
 
-
 trait StorageFactoryPackage {
+  // format: OFF
   this: Any
     with ConfigPackage
     with Util
@@ -288,6 +285,7 @@ trait StorageFactoryPackage {
     with StoragePackage
     with StorageInterpretationsPackage
   ⇒
+  // format: ON
 
   trait StorageFactory[-T] extends Any with TypeClass.WithTypeParams[T, StorageFactory.Ops]
 
@@ -328,8 +326,7 @@ trait StorageFactoryInterpretationsPackage extends Any {
   implicit def recordStorageFactory[
     config: CouldBe[Config.Ops]#t,
     rec <: HList
-  ]
-  // format: ON
+  ] // format: ON
   : StorageFactory[config :: rec] = self ⇒ new StorageFactory.Ops {
     final type Config = StorageFactoryInterpretationsPackage.this.Config.Ops
     final val configSource :: _ = self
