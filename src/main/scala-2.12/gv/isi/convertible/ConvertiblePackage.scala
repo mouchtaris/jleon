@@ -1,7 +1,7 @@
 package gv
 package isi.convertible
 
-trait Package extends Any {
+trait ConvertiblePackage extends Any {
 
   final type ~=>[A, B] = Conversion[A, B]
 

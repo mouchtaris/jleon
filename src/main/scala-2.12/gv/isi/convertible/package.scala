@@ -1,7 +1,7 @@
 package gv.isi
 
 package object convertible extends AnyRef
-    with Package
+    with ConvertiblePackage
     with Conversions {
 
   implicit class Convertible[S](override val self: S)
