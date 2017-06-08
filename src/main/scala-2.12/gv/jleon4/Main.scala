@@ -28,15 +28,6 @@ import isi.{ ~> }
 
 import gv.{ jleon4 ⇒ app }
 
-trait Util {
-  final def pf[T](t: ⇒ T): Any ~> T = { case _ ⇒ t }
-  /** syntax-require: block is never run */
-  final def squire(t: ⇒ Any): Unit = ()
-  final def couldBe[T] = new { def apply[U](u: U)(implicit ev: U ⇒ T): U = u }
-  final type CouldBe[T] = { type t[a] = a ⇒ T }
-  final type FactorySourceOf[T] = { type t[a] = a ⇒ T }
-}
-
 trait TypeClassPackage {
 
   trait TypeClass[-Self] extends Any {
