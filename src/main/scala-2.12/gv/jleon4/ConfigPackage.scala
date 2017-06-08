@@ -1,13 +1,7 @@
 package gv
 package jleon4
 
-import java.net.{ URI ⇒ JUri }
-
-import java.nio.file.{ Path ⇒ JPath, FileSystem ⇒ JFileSystem }
-
 import language.{ postfixOps, implicitConversions }
-
-import com.typesafe.config.{ Config ⇒ TSConfig  }
 
 trait ConfigPackage {
   this: TypeClassPackage ⇒

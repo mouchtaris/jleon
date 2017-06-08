@@ -24,7 +24,7 @@ import shapeless.{ HNil, ::, HList }
 
 import isi.convertible._
 import isi.std.conversions._
-import isi.{ ~> }
+import isi.{ ~~> }
 
 import gv.{ jleon4 ⇒ app }
 

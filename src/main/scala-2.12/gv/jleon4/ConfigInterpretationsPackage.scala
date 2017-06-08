@@ -1,14 +1,6 @@
 package gv
 package jleon4
 
-import java.nio.file.{ FileSystem ⇒ JFileSystem }
-
-import com.typesafe.config.{ Config ⇒ TSConfig }
-
-import shapeless.{ ::, HList }
-
-import Util._
-
 trait ConfigInterpretationsPackage extends Any {
   // format: OFF
   this: Any

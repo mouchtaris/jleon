@@ -20,7 +20,7 @@ import com.typesafe.scalalogging.{ StrictLogging, Logger }
 
 import isi.convertible._
 import isi.std.conversions._
-import isi.{ ~> }
+import isi.{ ~~> }
 
 object Main extends StrictLogging {
   app ⇒
@@ -134,7 +134,7 @@ object Main extends StrictLogging {
 
     private[this] object withMap {
       val nothing: Try[LockResult] = Failure(new Exception("nothing done yet"))
-      def pf[T](t: ⇒ T): Any ~> T = { case _ ⇒ t }
+      def pf[T](t: ⇒ T): Any ~~> T = { case _ ⇒ t }
     }
 
     private[this] final case class withMap(map: Map) {
