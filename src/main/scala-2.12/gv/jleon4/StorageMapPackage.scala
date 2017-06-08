@@ -1,7 +1,7 @@
 package gv
 package jleon4
 
-import java.nio.file.{ Path ⇒ JPath }
+import language.{ implicitConversions }
 
 trait StorageMapPackage {
   this: TypeClassPackage ⇒

@@ -1,8 +1,6 @@
 package gv
 package jleon4
 
-import java.nio.file.{ Path ⇒ JPath }
-
 trait PathPackage {
   this: TypeClassPackage ⇒
 

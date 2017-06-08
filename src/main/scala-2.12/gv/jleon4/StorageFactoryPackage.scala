@@ -3,10 +3,6 @@ package jleon4
 
 import language.{ implicitConversions }
 
-import shapeless.{ HNil }
-
-import isi.std.conversions._
-
 trait StorageFactoryPackage {
   // format: OFF
   this: Any

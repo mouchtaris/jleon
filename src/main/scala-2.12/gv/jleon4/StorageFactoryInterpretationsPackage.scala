@@ -1,10 +1,6 @@
 package gv
 package jleon4
 
-import shapeless.{ ::, HList }
-
-import Util._
-
 trait StorageFactoryInterpretationsPackage extends Any {
   // format: OFF
   this: Any

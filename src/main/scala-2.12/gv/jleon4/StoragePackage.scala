@@ -1,11 +1,6 @@
 package gv
 package jleon4
 
-import java.nio.file.{ FileAlreadyExistsException, NoSuchFileException }
-import java.nio.channels.{ ReadableByteChannel, WritableByteChannel }
-
-import util.{ Try, Success, Failure }
-
 trait StoragePackage {
   // format: OFF
   this: Any

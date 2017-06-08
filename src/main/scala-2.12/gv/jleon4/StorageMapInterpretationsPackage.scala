@@ -1,11 +1,6 @@
 package gv
 package jleon4
 
-import java.nio.file.{ Path ⇒ JPath }
-import shapeless.{ ::, HList }
-
-import Util._
-
 trait StorageMapInterpretationsPackage extends Any {
   // format: OFF
   this: Any
