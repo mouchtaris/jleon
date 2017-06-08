@@ -1,5 +1,4 @@
 package gv
-package jleon4
 
 import java.net.{ URI ⇒ JUri }
 
@@ -28,23 +27,25 @@ import isi.{ ~> }
 
 import gv.{ jleon4 ⇒ app }
 
-object Util extends Util {
+package object jleon4 {
 
-  final case object CouldBeSingleton
+  final type JUri = java.net.URI
 
-  implicit class CouldBe[T](val self: CouldBeSingleton.type) extends AnyVal {
-    final type t[a] = a ⇒ T
+  final type JPath = java.nio.file.Path
+  final type FileSystem = java.nio.file.FileSystem
+  final type FileAlreadyExistsException = java.nio.file.FileAlreadyExistsException
+  final type NoSuchFileException = java.nio.file.NoSuchFileException
 
-    def apply[U](u: U)(implicit ev: U ⇒ T): U = u
-  }
+  final type ReadableByteChannel = java.nio.channels.ReadableByteChannel
+  final type WritableByteChannel = java.nio.channels.WritableByteChannel
+  final type Channels = java.nio.channels.Channels
 
-}
+  final type Try[T] = util.Try[T]
+  final type Success[T] = util.Success[T]
+  final type Failure[T] = util.Failure[T]
 
-trait Util {
-  final def pf[T](t: ⇒ T): Any ~> T = { case _ ⇒ t }
+  final type Future[T] = concurrent.Future[T]
+  final type ExecutionContext = concurrent.ExecutionContext
+  final val Await = concurrent.Await
 
-  /** syntax-require: block is never run */
-  final def squire(t: ⇒ Any): Unit = ()
-
-  final def couldBe[T]: Util.CouldBe[T] = Util.CouldBeSingleton
 }

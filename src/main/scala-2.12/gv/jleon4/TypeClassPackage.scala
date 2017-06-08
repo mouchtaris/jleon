@@ -28,23 +28,25 @@ import isi.{ ~> }
 
 import gv.{ jleon4 ⇒ app }
 
-object Util extends Util {
+import Util._
 
-  final case object CouldBeSingleton
+trait TypeClassPackage {
 
-  implicit class CouldBe[T](val self: CouldBeSingleton.type) extends AnyVal {
-    final type t[a] = a ⇒ T
+  trait TypeClass[-Self] extends Any {
+    type Out
 
-    def apply[U](u: U)(implicit ev: U ⇒ T): U = u
+    def apply(self: Self): Out
   }
 
-}
+  object TypeClass {
+    trait WithTypeParams[-Self, out] extends Any with TypeClass[Self] {
+      final type Out = out
+    }
+  }
 
-trait Util {
-  final def pf[T](t: ⇒ T): Any ~> T = { case _ ⇒ t }
+  trait TypeClassCompanion[TC[T] <: TypeClass[T]] {
+    def apply[T: TC]: TC[T] = implicitly
+    def apply[T](self: T)(implicit tc: TC[T]): tc.Out = tc(self)
+  }
 
-  /** syntax-require: block is never run */
-  final def squire(t: ⇒ Any): Unit = ()
-
-  final def couldBe[T]: Util.CouldBe[T] = Util.CouldBeSingleton
 }

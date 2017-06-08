@@ -2,7 +2,6 @@ package gv
 package isi
 package std.conversions
 
-import scala.language.{ implicitConversions }
 import scala.util.{ Try, Success, Failure }
 
 import convertible.{ ~=> }
