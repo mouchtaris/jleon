@@ -83,6 +83,33 @@ object Main extends AnyRef
 
   }
 
+  trait Resource {
+    def apply(uri: Uri): Source1[ByteString]
+  }
+
+  trait FallBackResource extends Resource {
+    val fallBack: Resource
+    def applyImpl(uri: Uri): Source1[ByteString]
+
+    final def apply(uri: Uri): Source1[ByteString] = applyImpl(uri) recoverWithRetries (1, pf(fallBack(uri)))
+  }
+
+  trait CachingResource extends Resource {
+    val source: Resource
+    type Storage
+    val storage: Storage
+    implicit val storageOps: CouldBe[Storage.Ops]#t[Storage]
+
+    /**
+    * Store resource if it does not exist.
+    */
+    final def apply(uri: Uri): Source1[ByteString] = {
+      storage.tryLock(uri.toString) map {
+        case LockResult.Found(ins) ⇒ ???
+      }
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     val main = Main()
     val sto = main.factory.storageFactory.storage

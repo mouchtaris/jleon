@@ -39,11 +39,16 @@ trait Imports {
   final type ActorSystem = akka.actor.ActorSystem
 
   import akka.http.{ scaladsl ⇒ http }
+
+  final val Http = http.Http
+
   final type Route = http.server.Route
   final val Directives = http.server.Directives
   final type Directive0 = http.server.Directive0
   final type Directive1[T] = http.server.Directive1[T]
-  final val Http = http.Http
+
+  final type Uri = http.model.Uri
+  final val Uri = http.model.Uri
 
   import com.typesafe.{ config ⇒ tsconfig }
   final type TSConfig = tsconfig.Config
@@ -52,6 +57,9 @@ trait Imports {
   import com.typesafe.{ scalalogging ⇒ tslogging }
   final type StrictLogging = tslogging.StrictLogging
   final type Logger = tslogging.Logger
+
+  final type ByteString = akka.util.ByteString
+  final val ByteString = akka.util.ByteString
 
   final type HList = shapeless.HList
   final type HNil = shapeless.HNil
