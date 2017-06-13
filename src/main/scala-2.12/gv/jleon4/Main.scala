@@ -220,34 +220,36 @@ object Main extends AnyRef
     import i._
     import isi.std.io._
     import isi.akka._
-    import isi.concurrent.Executors.{ SyncExecutor ⇒ now }
+    import isi.concurrent.Executors.{ SyncExecutor ⇒ sameThread }
 
     implicit def recordResource[rc: i.CouldBe[i.Storage.Ops]#t, rec <: HList](rec: rc :: rec): Resource.Ops = new Resource.Ops {
       val storage :: _ = rec
 
+
       final def apply(uri: Uri): Source[ByteString, NotUsed] = {
         val item = uri.toString
-        val watt: Future[Source[ByteString, NotUsed]] = storage.tryLock(item)
-          .flatMap {
-            case i.LockResult.Acquired(outs) ⇒ Try {
-              outs.close()
-            } flatMap { (_: Unit) ⇒
-              storage.tryUnlock(item) flatMap {
-                case i.UnlockResult.Unlocked ⇒ Failure(new Exception(s"Not found: $uri"))
-              }
-            }
-            case i.LockResult.Found(ins) ⇒ Try {
-              ins
-            }
-          }
-          .convertToEffect[Future]
-          .map(_.convertTo[Stream[ByteString]])(now)
-          .map(_.convertTo[Source[ByteString, NotUsed]])(now)
-        val wat: Source[ByteString, Future[Done]] = watt
-          .convertTo[Source[ByteString, Future[NotUsed]]]
-          .mapMaterializedValue(_.map(_ ⇒ Done)(now))
 
-        wat
+        val extractChannelFromUnlock: i.UnlockResult ⇒ Try[ReadableByteChannel] = {
+          case i.UnlockResult.Unlocked ⇒ Failure(new Exception(s"not found: $uri"))
+        }
+
+        val extractChannelFromLock: i.LockResult ⇒ Try[ReadableByteChannel] = {
+          case i.LockResult.Found(ins) ⇒ Success(ins)
+          case i.LockResult.Acquired(outs) ⇒ for {
+            _ ← Try { outs.close() }
+            unlockResult ← storage tryUnlock item
+            channel ← extractChannelFromUnlock(unlockResult)
+          } yield channel
+        }
+
+        val trySource: Try[Source[ByteString, NotUsed]] = for {
+          lockResult ← storage tryLock item
+          channelIn ← extractChannelFromLock(lockResult)
+          stream = channelIn.convertTo[Stream[ByteString]]
+          source = stream.convertTo[Source[ByteString, NotUsed]]
+        } yield source
+
+        trySource.convertTo[Source[ByteString, NotUsed]]
       }
     }
   }

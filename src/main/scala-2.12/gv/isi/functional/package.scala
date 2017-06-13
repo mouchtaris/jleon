@@ -9,7 +9,9 @@ package object functional extends AnyRef
     with typeclasses.Numeric
     with typeclasses.Collections
     with monads.Collections
-    with monads.ScalaGenericCompanions {
+    with monads.ScalaGenericCompanions
+    with BindersPackage
+{
 
   final implicit class MonadDecorations[F[_], A](val fa: F[A]) extends AnyVal with MonadOps[F, A]
 
