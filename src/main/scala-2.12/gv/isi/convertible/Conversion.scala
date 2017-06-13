@@ -4,7 +4,7 @@ package convertible
 
 import language.{ implicitConversions }
 
-trait Conversion[A, B] {
+trait Conversion[-A, +B] {
   def apply(a: A): B
 }
 

@@ -42,6 +42,12 @@ trait Conversions {
   final implicit def `Future[Source[T]] ~⇒ Source[T]`[T, M]: Future[Graph[SourceShape[T], M]] ~⇒ Source[T, Future[M]] =
     Source fromFutureSource[T, M] _
 
+  final implicit def `Future[Source[T]] ~⇒ Source[T] (Future Mat)`[T, M]:
+    Future[Graph[SourceShape[T], Future[M]]] ~⇒ Source[T, Future[M]] =
+    future ⇒
+      `Future[Source[T]] ~⇒ Source[T]`(future)
+        .mapMaterializedValue(_.flatten)
+
   final implicit def `Future[T] ~⇒ Source[T]`[T]: Future[T] ~⇒ Source[T, NotUsed] =
     Source fromFuture[T] _
 

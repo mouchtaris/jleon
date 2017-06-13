@@ -99,58 +99,63 @@ object Main extends AnyRef
     final def apply(uri: Uri): Source1[ByteString] = applyImpl(uri) recoverWithRetries (1, pf(fallBack(uri)))
   }
 
-  trait CachingResource extends Resource {
+  trait CachingResource {
+    type Resource
     val source: Resource
+    implicit val sourceOps: CouldBe[app.Resource]#t[Resource]
     type Storage
     val storage: Storage
     implicit val storageOps: CouldBe[Storage.Ops]#t[Storage]
 
+    final type Out = Source[ByteString, Future[Done]]
+
+    import isi.std.io._
+    import isi.akka._
+    private[this] val handleFound: LockResult ~~> Try[Out] = {
+      case LockResult.Found(ins) ⇒ Success {
+        ins
+          .convertTo[Stream[ByteString]]
+          .convertTo[Source[ByteString, NotUsed]]
+          .mapMaterializedValue(_ ⇒ Future successful Done)
+      }
+    }
+
+    private[this] def handleAcquired(uri: Uri): LockResult ~~> Try[Out] = {
+      case LockResult.Acquired(outs) ⇒ Success {
+        val sink: Sink[ByteString, Future[Int]] = outs
+          .convertTo[Sink[ByteBuffer, Future[Int]]]
+          .convertTo[Sink[ByteString, Future[Int]]]
+        source(uri)
+          .alsoToMat(sink)(Keep.right)
+          .mapMaterializedValue(_.map(_ ⇒ Done)(isi.concurrent.Executors.SyncExecutor))
+      }
+    }
+
+    private[this] val handleFailed: LockResult ~~> Try[Out] = {
+
+      case fail @ LockResult.Failed(_) ⇒ Failure(fail)
+    }
+
+    private[this] val handleLocked: LockResult ~~> Try[Out] = {
+
+      case fail @ LockResult.Locked(_, _) ⇒ Failure(fail)
+    }
+
+    private[this] val handleStandards: LockResult ~~> Try[Out] =
+      handleFound orElse handleFailed orElse handleLocked
+
+    private[this] def handleLockTry(uri: Uri): LockResult ~~> Try[Out] =
+      handleAcquired(uri) orElse handleStandards
+
     /**
      * Store resource if it does not exist.
      */
-    final def apply(uri: Uri): Source1[ByteString] = {
-      import isi.akka._
-      import isi.std.io._
-      val f1: Try[LockResult] =
-        storage
-          .tryLock(uri.toString)
-      val f2: Try[Source[ByteString, Future[Done]]] = f1
-        .flatMap {
-          case LockResult.Found(ins) ⇒ Success {
-            ins
-              .convertTo[Stream[ByteString]]
-              .convertTo[Source[ByteString, NotUsed]]
-              .mapMaterializedValue(_ ⇒ Future successful Done)
-          }
-          case LockResult.Acquired(outs) ⇒ Success {
-            val sink: Sink[ByteString, Future[Int]] = outs
-              .convertTo[Sink[ByteBuffer, Future[Int]]]
-              .convertTo[Sink[ByteString, Future[Int]]]
-            source(uri)
-              .alsoToMat(sink)(Keep.right)
-              .mapMaterializedValue(_.map(_ ⇒ Done)(isi.concurrent.Executors.SyncExecutor))
-          }
-          case fail @ LockResult.Locked(_, _) ⇒ Failure(fail)
-          case fail @ LockResult.Failed(_)    ⇒ Failure(fail)
-        }
-      //        .flatMap {
-      //          case LockResult.Found(ins) ⇒ Success {
-      //            ins.convertTo[Stream[ByteString]].convertToEffect[Source1]()
-      //          }
-      //          case LockResult.Acquired(outs) ⇒ Success {
-      //            val storageSink: Sink[ByteString, Future[Int]] = outs
-      //              .convertTo[Sink[ByteBuffer, Future[Int]]]
-      //              .convertTo[Sink[ByteString, Future[Int]]]
-      //            source(uri).alsoToMat(storageSink)(Keep.both)
-      //          }
-      //        }
-      //        .convertToEffect[Future]()
-      //      val wat = Source fromFutureSource wet
-      //      val wot = wat
-      ??? // asd
-      //        .convertToEffect[SourceWithMat[NotUsed]#t]()
-
-    }
+    final def apply(uri: Uri): Source[ByteString, Future[Done]] =
+      storage
+        .tryLock(uri.toString)
+        .flatMap(handleLockTry(uri))
+        .convertToEffect[Future]()
+        .convertTo[Source[ByteString, Future[Done]]]
   }
 
   def main(args: Array[String]): Unit = {
