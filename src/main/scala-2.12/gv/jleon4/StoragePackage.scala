@@ -1,6 +1,8 @@
 package gv
 package jleon4
 
+import isi.io.{ File }
+
 trait StoragePackage {
   // format: OFF
   this: Any
@@ -29,8 +31,6 @@ trait StoragePackage {
     val nothing: Try[LockResult] = Failure(new Exception("nothing happened yet"))
 
     trait Ops {
-      import java.nio.file.{ Files, StandardOpenOption ⇒ oopt }
-
       type StorageMap <: StoragePackage.this.StorageMap.Ops
       def storageMap: StorageMap
 
@@ -38,15 +38,15 @@ trait StoragePackage {
         val map = storageMap(item)
 
         val getFailure: Try[LockResult] =
-          if (Files exists map.failure)
+          if (File exists map.failure)
             Success(LockResult.Failed(map.item))
           else
             Failure(new NoSuchFileException(map.failure.toString))
 
         val getLock: Try[LockResult] = Try {
-          Files newByteChannel (map.lock, oopt.CREATE_NEW, oopt.WRITE) close ()
+          File create map.lock close ()
         } map { _ ⇒
-          Files newByteChannel (map.storage, oopt.CREATE_NEW, oopt.WRITE)
+          File create map.storage
         } map {
           LockResult.Acquired.apply
         } recover {
@@ -54,7 +54,7 @@ trait StoragePackage {
         }
 
         val getStorage: Try[LockResult] = Try {
-          Files newByteChannel (map.storage, oopt.READ)
+          File open map.storage
         } map {
           LockResult.Found.apply
         }

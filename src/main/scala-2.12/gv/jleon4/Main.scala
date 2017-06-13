@@ -114,14 +114,24 @@ object Main extends AnyRef
       val f1: Try[LockResult] =
         storage
           .tryLock(uri.toString)
-      val f2: Try[Stream[ByteString]] = f1
+      val f2: Try[Source[ByteString, Future[Done]]] = f1
         .flatMap {
           case LockResult.Found(ins) ⇒ Success {
-            ins.convertTo[Stream[ByteString]]
+            ins
+              .convertTo[Stream[ByteString]]
+              .convertTo[Source[ByteString, NotUsed]]
+              .mapMaterializedValue(_ ⇒ Future successful Done)
           }
-          case LockResult.Acquired(outs) ⇒
-            val so: Source[ByteString, NotUsed] = source.apply(uri)
-            ???
+          case LockResult.Acquired(outs) ⇒ Success {
+            val sink: Sink[ByteString, Future[Int]] = outs
+              .convertTo[Sink[ByteBuffer, Future[Int]]]
+              .convertTo[Sink[ByteString, Future[Int]]]
+              source(uri)
+                .alsoToMat(sink)(Keep.right)
+              .mapMaterializedValue(_.map( _ ⇒ Done)(isi.concurrent.Executors.SyncExecutor))
+          }
+          case fail @ LockResult.Locked(_, _) ⇒ Failure(fail)
+          case fail @ LockResult.Failed(_)    ⇒ Failure(fail)
         }
       //        .flatMap {
       //          case LockResult.Found(ins) ⇒ Success {

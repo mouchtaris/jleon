@@ -20,7 +20,9 @@ trait Imports {
   final val Failure = util.Failure
 
   final type Future[T] = concurrent.Future[T]
+  final val Future = concurrent.Future
   final type ExecutionContext = concurrent.ExecutionContext
+  final val ExecutionContext = concurrent.ExecutionContext
   final val Await = concurrent.Await
 
   import akka.stream.{ scaladsl ⇒ stream }

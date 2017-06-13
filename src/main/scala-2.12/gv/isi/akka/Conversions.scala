@@ -8,6 +8,7 @@ import language.{ postfixOps }
 import concurrent.{ Future }
 
 import _root_.akka.stream.scaladsl.{ Source, Flow, Sink, Keep }
+import _root_.akka.stream.{ Graph, SourceShape }
 import _root_.akka.util.{ ByteString }
 import _root_.akka.{ NotUsed }
 
@@ -35,8 +36,11 @@ trait Conversions {
         Some(((), ByteString(buffer)))
     }
 
-  final implicit def `CouldBe[Iterable[T]] ⇒ Source[T]`[T, S: CouldBe[Iterable[T]]#t]: S ~⇒ Source[T, NotUsed] =
+  final implicit def `CouldBe[Iterable[T]] ~⇒ Source[T]`[T, S: CouldBe[Iterable[T]]#t]: S ~⇒ Source[T, NotUsed] =
     items ⇒ Source fromIterator (() ⇒ items.iterator)
+
+  final implicit def `Future[Source[T]] ~⇒ Source[T]`[T, M]: Future[Graph[SourceShape[T], M]] ~⇒ Source[T, Future[M]] =
+    Source fromFutureSource[T, M] _
 
   final implicit def `Future[T] ~⇒ Source[T]`[T]: Future[T] ~⇒ Source[T, NotUsed] =
     Source fromFuture[T] _
@@ -57,5 +61,10 @@ trait Conversions {
     implicit flow: Flow[U, T, NotUsed]
   ): Sink[T, M] ~⇒ Sink[U, M] =
     sink0 ⇒ flow.toMat(sink0)(Keep.right)
+
+  final implicit def `Source[T] ~⇒ Source[U]`[T, U, M, NotUsed](
+    implicit flow: Flow[T, U, NotUsed]
+  ): Source[T, M] ~⇒ Source[U, M] =
+    source0 ⇒ source0.viaMat(flow)(Keep.left)
 
 }
