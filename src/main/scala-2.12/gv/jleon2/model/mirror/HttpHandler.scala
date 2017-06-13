@@ -4,7 +4,7 @@ package model.mirror
 
 import java.nio.{ ByteBuffer }
 
-import language.{ implicitConversions }
+//import language.{ implicitConversions }
 import concurrent.{ Future }
 
 import akka.stream.scaladsl.{ Source }

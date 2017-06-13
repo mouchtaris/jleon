@@ -8,7 +8,7 @@ import _root_.java.{ net ⇒ jnet }
 
 trait UriConversions extends Any {
 
-  import akka.http.scaladsl.model.{ Uri ⇒ AkkaUri }
+  import _root_.akka.http.scaladsl.model.{ Uri ⇒ AkkaUri }
   import jnet.{ URI ⇒ JavaUri }
 
   @inline

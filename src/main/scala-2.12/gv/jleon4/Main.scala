@@ -1,33 +1,38 @@
 package gv
 package jleon4
 
-import java.net.{ URI ⇒ JUri }
+//import java.net.{ URI ⇒ JUri }
 
-import java.nio.file.{ Path ⇒ JPath, FileSystem ⇒ JFileSystem, FileAlreadyExistsException, NoSuchFileException }
-import java.nio.channels.{ ReadableByteChannel, WritableByteChannel, Channels }
+import java.nio.{ ByteBuffer }
+//import java.nio.file.{ Path ⇒ JPath, FileSystem ⇒ JFileSystem, FileAlreadyExistsException, NoSuchFileException }
+//import java.nio.channels.{ ReadableByteChannel, WritableByteChannel, Channels }
 
-import language.{ postfixOps, implicitConversions, higherKinds, existentials }
-import util.{ Try, Success, Failure }
-import concurrent.{ Future, ExecutionContext, Await }
-import concurrent.duration._
+//import language.{ postfixOps, implicitConversions, higherKinds, existentials }
+//import util.{ Try, Success, Failure }
+//import concurrent.{ Future, ExecutionContext, Await }
+//import concurrent.duration._
 
-import akka.stream.scaladsl.{ Source, Flow, Sink }
-import akka.stream.{ Materializer, ActorMaterializer }
-import akka.actor.{ ActorSystem }
-import akka.http.scaladsl.server.{ Route, Directives, Directive0 }
-import akka.http.scaladsl.{ Http }
+//import akka.stream.scaladsl.{ Source, Flow, Sink }
+//import akka.stream.{ Materializer, ActorMaterializer }
+//import akka.actor.{ ActorSystem }
+//import akka.http.scaladsl.server.{ Route, Directives, Directive0 }
+//import akka.http.scaladsl.{ Http }
 
-import com.typesafe.config.{ Config ⇒ TSConfig, ConfigFactory ⇒ TSConfigFactory }
-import com.typesafe.scalalogging.{ StrictLogging, Logger }
+//import com.typesafe.config.{
+//  Config ⇒ TSConfig,
+//  ConfigFactory ⇒ TSConfigFactory
+//}
+//import com.typesafe.scalalogging.{ StrictLogging, Logger }
 
-import shapeless.{ HNil, ::, HList }
+//import shapeless.{ HNil, ::, HList }
 
 import isi.convertible._
-import isi.std.conversions._
-import isi.{ ~~> }
+//import isi.std.conversions._
+//import isi.std.io._
+//import isi.akka._
+//import isi.{ ~~> }
 
-import gv.{ jleon4 ⇒ app }
-
+//import gv.{ jleon4 ⇒ app }
 
 object Main extends AnyRef
     with Util
@@ -101,12 +106,40 @@ object Main extends AnyRef
     implicit val storageOps: CouldBe[Storage.Ops]#t[Storage]
 
     /**
-    * Store resource if it does not exist.
-    */
+     * Store resource if it does not exist.
+     */
     final def apply(uri: Uri): Source1[ByteString] = {
-      storage.tryLock(uri.toString) map {
-        case LockResult.Found(ins) ⇒ ???
-      }
+      import isi.akka._
+      import isi.std.io._
+      val f1: Try[LockResult] =
+        storage
+        .tryLock(uri.toString)
+      val f2: Try[Stream[ByteString]] = f1
+        .flatMap {
+          case LockResult.Found(ins) ⇒ Success {
+            ins.convertTo[Stream[ByteString]]
+          }
+          case LockResult.Acquired(outs) ⇒
+            val so: Source[ByteString, NotUsed] = source.apply(uri)
+            ???
+          }
+//        .flatMap {
+//          case LockResult.Found(ins) ⇒ Success {
+//            ins.convertTo[Stream[ByteString]].convertToEffect[Source1]()
+//          }
+//          case LockResult.Acquired(outs) ⇒ Success {
+//            val storageSink: Sink[ByteString, Future[Int]] = outs
+//              .convertTo[Sink[ByteBuffer, Future[Int]]]
+//              .convertTo[Sink[ByteString, Future[Int]]]
+//            source(uri).alsoToMat(storageSink)(Keep.both)
+//          }
+//        }
+//        .convertToEffect[Future]()
+//      val wat = Source fromFutureSource wet
+//      val wot = wat
+      ??? // asd
+//        .convertToEffect[SourceWithMat[NotUsed]#t]()
+
     }
   }
 

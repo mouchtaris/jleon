@@ -2,7 +2,7 @@ package gv
 package jleon2
 package model.uri
 
-import language.{ implicitConversions }
+//import language.{ implicitConversions }
 
 trait Uri extends Uri.Types {
   def toJava: java.net.URI

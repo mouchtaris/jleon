@@ -2,7 +2,6 @@ package gv
 package jleon2
 package impl.http
 
-import language.{ implicitConversions, postfixOps }
 import util.{ Try, Success, Failure }
 import concurrent.{ Future, ExecutionContext }
 
@@ -27,7 +26,7 @@ object Akka {
 
     final case class Response(response: http.model.HttpResponse) extends model.http.Response {
       val isSuccess: Try[Unit] = response.status match {
-        case http.model.StatusCodes.Success(_) ⇒ Success(Unit)
+        case http.model.StatusCodes.Success(_) ⇒ Success(())
         case status                            ⇒ Failure(new Exception(status.toString))
       }
 
@@ -44,7 +43,7 @@ object Akka {
       final type Response = model.http.Response
     }
 
-    final case class Client(implicit client: http.HttpExt, mat: akka.stream.Materializer) extends model.http.Client
+    final case class Client()(implicit client: http.HttpExt, mat: akka.stream.Materializer) extends model.http.Client
         with Types {
 
       import http.client.{ RequestBuilding }

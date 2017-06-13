@@ -1,16 +1,16 @@
 package gv.jleon2
 package model
 
-import concurrent.{ Future }
-import util.{ Success, Failure }
+//import concurrent.{ Future }
+//import util.{ Success, Failure }
 
-import scalaz.syntax.monad.{ _ }
+//import scalaz.syntax.monad.{ _ }
 
-import gv.isi
+//import gv.isi
 //
-import isi.scalaz._
+//import isi.scalaz._
 
-import error.Error.WithErrorHandling
+//import error.Error.WithErrorHandling
 
 trait JLeon extends AnyRef {
   // format: OFF

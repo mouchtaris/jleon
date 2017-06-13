@@ -25,13 +25,21 @@ trait Imports {
 
   import akka.stream.{ scaladsl ⇒ stream }
   final type NotUsed = akka.NotUsed
+  final val NotUsed = akka.NotUsed
+  final type Done = akka.Done
+  final val Done = akka.Done
   final type Source[Out, Mat] = stream.Source[Out, Mat]
+  final type SourceWithMat[Mat] = { type t[Out] = stream.Source[Out, Mat] }
+  final val Source = stream.Source
   final type Flow[In, Out, Mat] = stream.Flow[In, Out, Mat]
+  final val Flow = stream.Flow
   final type Sink[In, Mat] = stream.Sink[In, Mat]
+  final val Sink = stream.Sink
+  final val Keep = stream.Keep
 
   final type Source1[Out] = Source[Out, NotUsed]
   final type Flow2[In, Out] = Flow[In, Out, NotUsed]
-  final type Sink1[In] = Sink[In, NotUsed]
+  final type Sink1[In] = Sink[In, Future[Done]]
 
   final type Materializer = akka.stream.Materializer
   final type ActorMaterializer = akka.stream.ActorMaterializer
@@ -53,6 +61,10 @@ trait Imports {
   import com.typesafe.{ config ⇒ tsconfig }
   final type TSConfig = tsconfig.Config
   final type TSConfigFactory = tsconfig.ConfigFactory
+  final case object TSConfigFactory {
+    import tsconfig.{ ConfigFactory ⇒ fac }
+    @inline def defaultApplication(): TSConfig = fac.defaultApplication()
+  }
 
   import com.typesafe.{ scalalogging ⇒ tslogging }
   final type StrictLogging = tslogging.StrictLogging

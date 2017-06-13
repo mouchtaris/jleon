@@ -2,16 +2,60 @@ package gv
 package isi
 package akka
 
-import java.nio.channels.{ ReadableByteChannel }
+import java.nio.{ ByteBuffer }
 
-import _root_.akka.stream.scaladsl.{ Source }
+import language.{ postfixOps }
+import concurrent.{ Future }
+
+import _root_.akka.stream.scaladsl.{ Source, Flow, Sink, Keep }
 import _root_.akka.util.{ ByteString }
 import _root_.akka.{ NotUsed }
 
-import isi.convertible._
+import io.{ ByteSource, ByteSink }
+import convertible._
+import std.io._
+
+private[this] object ThisImports extends AnyRef
+with functional.Unfold
+with CouldBe
+
+import ThisImports._
 
 trait Conversions {
 
-  final implicit val `ReadableByteChannel ~⇒ Source[ByteString]`:
+  final implicit def `ByteSource ~⇒ Stream[ByteString]`[BS: ByteSource]: BS ~⇒ Stream[ByteString] =
+    source ⇒ unfold(()) { _ ⇒
+      val buffer = ByteBuffer.allocate(8 << 10)
+      buffer.clear()
+      val read = source.read(buffer)
+      buffer.flip()
+      if (read == -1)
+        None
+      else
+        Some(((), ByteString(buffer)))
+    }
+
+  final implicit def `CouldBe[Iterable[T]] ⇒ Source[T]`[T, S: CouldBe[Iterable[T]]#t]: S ~⇒ Source[T, NotUsed] =
+    items ⇒ Source fromIterator (() ⇒ items.iterator)
+
+  final implicit def `Future[T] ~⇒ Source[T]`[T]: Future[T] ~⇒ Source[T, NotUsed] =
+    Source fromFuture[T] _
+
+  final implicit def `ByteSink ~⇒ Sink[ByteBuffer]`[BS: ByteSink]: BS ~⇒ Sink[ByteBuffer, Future[Int]] =
+    byteSink ⇒
+      Sink
+        .fold(0) { (total: Int, buffer: ByteBuffer) ⇒ total + byteSink.writeCompletely(buffer) }
+
+  final implicit val `Flow[ByteString] ⇒ Flow[ByteBuffer]`: Flow[ByteString, ByteBuffer, NotUsed] =
+    Flow[ByteString]
+      .map { _.asByteBuffers }
+      .map { buffers ⇒ () ⇒ buffers.iterator }
+      .map { Source fromIterator }
+      .flatMapConcat { Predef identity }
+
+  final implicit def `Sink[T] ~⇒ Sink[U]`[T, U, M, NotUsed](
+    implicit flow: Flow[U, T, NotUsed]
+  ): Sink[T, M] ~⇒ Sink[U, M] =
+    sink0 ⇒ flow.toMat(sink0)(Keep.right)
 
 }

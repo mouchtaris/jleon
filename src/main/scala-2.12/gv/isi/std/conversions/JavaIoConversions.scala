@@ -39,5 +39,3 @@ trait JavaIoConversions extends AnyRef {
       def readInto(source: Any, into: ByteBuffer): Int = channel read into
     }
 }
-
-object JavaIoConversions extends JavaIoConversions

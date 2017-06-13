@@ -8,7 +8,7 @@ import java.nio.channels.{ ReadableByteChannel }
 import isi.io.{ ByteSource ⇒ BS }
 import isi.convertible.{ ~⇒, Convertible }
 
-trait ByteSource extends AnyRef {
+trait ByteSourceInstances extends AnyRef {
 
   final implicit object ReadableByteChannelSource extends BS[ReadableByteChannel] {
     @inline
@@ -38,5 +38,3 @@ trait ByteSource extends AnyRef {
     }
   }
 }
-
-object ByteSource extends ByteSource
