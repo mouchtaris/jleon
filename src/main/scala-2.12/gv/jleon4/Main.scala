@@ -113,7 +113,7 @@ object Main extends AnyRef
       import isi.std.io._
       val f1: Try[LockResult] =
         storage
-        .tryLock(uri.toString)
+          .tryLock(uri.toString)
       val f2: Try[Stream[ByteString]] = f1
         .flatMap {
           case LockResult.Found(ins) ⇒ Success {
@@ -122,23 +122,23 @@ object Main extends AnyRef
           case LockResult.Acquired(outs) ⇒
             val so: Source[ByteString, NotUsed] = source.apply(uri)
             ???
-          }
-//        .flatMap {
-//          case LockResult.Found(ins) ⇒ Success {
-//            ins.convertTo[Stream[ByteString]].convertToEffect[Source1]()
-//          }
-//          case LockResult.Acquired(outs) ⇒ Success {
-//            val storageSink: Sink[ByteString, Future[Int]] = outs
-//              .convertTo[Sink[ByteBuffer, Future[Int]]]
-//              .convertTo[Sink[ByteString, Future[Int]]]
-//            source(uri).alsoToMat(storageSink)(Keep.both)
-//          }
-//        }
-//        .convertToEffect[Future]()
-//      val wat = Source fromFutureSource wet
-//      val wot = wat
+        }
+      //        .flatMap {
+      //          case LockResult.Found(ins) ⇒ Success {
+      //            ins.convertTo[Stream[ByteString]].convertToEffect[Source1]()
+      //          }
+      //          case LockResult.Acquired(outs) ⇒ Success {
+      //            val storageSink: Sink[ByteString, Future[Int]] = outs
+      //              .convertTo[Sink[ByteBuffer, Future[Int]]]
+      //              .convertTo[Sink[ByteString, Future[Int]]]
+      //            source(uri).alsoToMat(storageSink)(Keep.both)
+      //          }
+      //        }
+      //        .convertToEffect[Future]()
+      //      val wat = Source fromFutureSource wet
+      //      val wot = wat
       ??? // asd
-//        .convertToEffect[SourceWithMat[NotUsed]#t]()
+      //        .convertToEffect[SourceWithMat[NotUsed]#t]()
 
     }
   }

@@ -3,9 +3,8 @@ package isi
 package std
 
 package object io extends AnyRef
-  with ByteSourceInstances
-  with ByteSinkInstances
-{
+    with ByteSourceInstances
+    with ByteSinkInstances {
 
   implicit class ReadCompletelyDecoration[T](val self: T) extends AnyVal with ReadCompletely[T]
   implicit class WriteCompletelyDecoration[T](val self: T) extends AnyVal with WriteCompletely[T]

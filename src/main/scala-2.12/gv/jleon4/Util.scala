@@ -2,8 +2,7 @@ package gv
 package jleon4
 
 trait Util extends AnyRef
-  with isi.CouldBe
-{
+    with isi.CouldBe {
   final def pf[T](t: ⇒ T): Any ~~> T = { case _ ⇒ t }
 
   /** syntax-require: block is never run */

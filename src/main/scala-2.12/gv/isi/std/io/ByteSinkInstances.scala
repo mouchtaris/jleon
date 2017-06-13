@@ -17,9 +17,9 @@ trait ByteSinkInstances extends AnyRef {
   }
 
   /**
-    * Anything that can be converted to a ReadableByteChannel, has a ByteSink
-    * interpretation as well.
-    */
+   * Anything that can be converted to a ReadableByteChannel, has a ByteSink
+   * interpretation as well.
+   */
   final implicit def `T ~=> WritableByteChanel: ByteSource`[T](implicit conv: T ~⇒ WritableByteChannel): BS[T] =
     (dest, from) ⇒ WritableByteChannelSource writeFrom (dest.convertTo[WritableByteChannel], from)
 
