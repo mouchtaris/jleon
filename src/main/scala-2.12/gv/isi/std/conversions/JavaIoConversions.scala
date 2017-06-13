@@ -11,7 +11,13 @@ import jnio.channels.{ ReadableByteChannel, WritableByteChannel, Channels }
 import jio.{ InputStream, OutputStream }
 
 import isi.io.{ ByteSource }
+
+import io.{ ByteSourceDecoration }
 import convertible.{ ~⇒ }
+
+private[this] case object Imports extends AnyRef
+  with functional.Unfold
+import Imports._
 
 trait JavaIoConversions extends AnyRef {
 
@@ -35,7 +41,18 @@ trait JavaIoConversions extends AnyRef {
     }
 
   final implicit def `ReadableByteChannel ~=> ByteSource[T]`: ReadableByteChannel ~⇒ ByteSource[Any] =
-    (channel: ReadableByteChannel) ⇒ new ByteSource[Any] {
-      def readInto(source: Any, into: ByteBuffer): Int = channel read into
+    (channel: ReadableByteChannel) ⇒ (sourceNotUsed: Any, into: ByteBuffer) ⇒ channel read into
+
+  final implicit def `ByteSource ~⇒ Stream[ByteBuffer]`[BS: ByteSource]: BS ~⇒ Stream[ByteBuffer] =
+    source ⇒ unfold(()) { _ ⇒
+      val buffer = ByteBuffer.allocate(8 << 10)
+      buffer.clear()
+      val read = source.read(buffer)
+      buffer.flip()
+      if (read == -1)
+        None
+      else
+        Some { ((), buffer) }
     }
+
 }

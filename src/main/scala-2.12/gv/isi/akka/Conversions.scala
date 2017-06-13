@@ -15,6 +15,7 @@ import _root_.akka.{ NotUsed }
 import io.{ ByteSource, ByteSink }
 import convertible._
 import std.io._
+import std.conversions._
 
 private[this] object ThisImports extends AnyRef
 with functional.Unfold
@@ -25,16 +26,9 @@ import ThisImports._
 trait Conversions {
 
   final implicit def `ByteSource ~⇒ Stream[ByteString]`[BS: ByteSource]: BS ~⇒ Stream[ByteString] =
-    source ⇒ unfold(()) { _ ⇒
-      val buffer = ByteBuffer.allocate(8 << 10)
-      buffer.clear()
-      val read = source.read(buffer)
-      buffer.flip()
-      if (read == -1)
-        None
-      else
-        Some(((), ByteString(buffer)))
-    }
+    source ⇒
+      `ByteSource ~⇒ Stream[ByteBuffer]`[BS].apply(source)
+        .map(ByteString(_))
 
   final implicit def `CouldBe[Iterable[T]] ~⇒ Source[T]`[T, S: CouldBe[Iterable[T]]#t]: S ~⇒ Source[T, NotUsed] =
     items ⇒ Source fromIterator (() ⇒ items.iterator)

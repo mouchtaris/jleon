@@ -19,11 +19,21 @@ trait StoragePackage {
     case class Acquired(channel: WritableByteChannel) extends LockResult
     case class Found(channel: ReadableByteChannel) extends LockResult
 
+    // Errors
+
     case class Locked(item: String, cause: FileAlreadyExistsException)
-      extends Exception(s"item is locked: $item", cause) with LockResult
+      extends Exception(s"item is locked: $item", cause)
 
     case class Failed(item: String)
-      extends Exception(s"item is failed: $item") with LockResult
+      extends Exception(s"item is failed: $item")
+  }
+
+  sealed trait UnlockResult
+  final object UnlockResult {
+    case object Unlocked extends UnlockResult
+
+    // Errors
+    case class NotLocked(item: String) extends Exception(s"item not locked: $item")
   }
 
   trait Storage[-T] extends TypeClass.WithTypeParams[T, Storage.Ops]
@@ -41,7 +51,7 @@ trait StoragePackage {
 
         val getFailure: Try[LockResult] =
           if (File exists map.failure)
-            Success(LockResult.Failed(map.item))
+            Failure(LockResult.Failed(map.item))
           else
             Failure(new NoSuchFileException(map.failure.toString))
 
@@ -51,8 +61,8 @@ trait StoragePackage {
           File create map.storage
         } map {
           LockResult.Acquired.apply
-        } recover {
-          case ex: FileAlreadyExistsException ⇒ LockResult.Locked(map.item, ex)
+        } recoverWith {
+          case ex: FileAlreadyExistsException ⇒ Failure(LockResult.Locked(map.item, ex))
         }
 
         val getStorage: Try[LockResult] = Try {
@@ -63,11 +73,19 @@ trait StoragePackage {
 
         val tryLock: Try[LockResult] =
           nothing recoverWith pf(getFailure) recoverWith pf(getLock) recoverWith pf(getStorage)
+
+        val tryUnlock: Try[UnlockResult] =
+          if (File exists map.lock)
+            Try { File remove map.lock } map (_ ⇒ UnlockResult.Unlocked)
+        else
+            Failure(UnlockResult.NotLocked(map.item))
       }
 
       final def apply(item: String): ForItem = new ForItem(item)
 
       final val tryLock: String ⇒ Try[LockResult] = apply _ andThen (_.tryLock)
+
+      final val tryUnlock: String ⇒ Try[UnlockResult] = apply _ andThen (_.tryUnlock)
     }
   }
 

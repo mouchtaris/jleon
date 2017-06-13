@@ -26,6 +26,10 @@ trait File extends Any {
   @inline
   final def truncate(path: JPath): WritableByteChannel =
     JFiles newByteChannel (path, opt.CREATE, opt.WRITE, opt.TRUNCATE_EXISTING)
+
+  @inline
+  final def remove(path: JPath): Unit =
+    JFiles delete path
 }
 
 object File extends File
