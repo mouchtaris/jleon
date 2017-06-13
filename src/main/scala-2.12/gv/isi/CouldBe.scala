@@ -8,7 +8,7 @@ object CouldBeValues {
   implicit class CouldBe[T](val self: CouldBeSingleton.type) extends AnyVal {
     final type t[a] = a ⇒ T
 
-    def apply[U](u: U)(implicit ev: U ⇒ T): U = u
+    def apply[U: CouldBe[T]#t](u: U): U = u
   }
 
 }

@@ -5,7 +5,7 @@ package akka
 import java.nio.{ ByteBuffer }
 
 import language.{ postfixOps }
-import concurrent.{ Future }
+import scala.concurrent.{ Future }
 
 import _root_.akka.stream.scaladsl.{ Source, Flow, Sink, Keep }
 import _root_.akka.stream.{ Graph, SourceShape }
@@ -57,13 +57,13 @@ trait Conversions {
       .map { Source fromIterator }
       .flatMapConcat { Predef identity }
 
-  final implicit def `Sink[T] ~⇒ Sink[U]`[T, U, M, NotUsed](
-    implicit flow: Flow[U, T, NotUsed]
+  final implicit def `Sink[T] ~⇒ Sink[U]`[T, U, M](
+    implicit flow: Flow[U, T, Any]
   ): Sink[T, M] ~⇒ Sink[U, M] =
     sink0 ⇒ flow.toMat(sink0)(Keep.right)
 
-  final implicit def `Source[T] ~⇒ Source[U]`[T, U, M, NotUsed](
-    implicit flow: Flow[T, U, NotUsed]
+  final implicit def `Source[T] ~⇒ Source[U]`[T, U, M](
+    implicit flow: Flow[T, U, Any]
   ): Source[T, M] ~⇒ Source[U, M] =
     source0 ⇒ source0.viaMat(flow)(Keep.left)
 

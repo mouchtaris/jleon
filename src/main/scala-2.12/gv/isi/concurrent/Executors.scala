@@ -2,7 +2,7 @@ package gv
 package isi
 package concurrent
 
-import java.util.concurrent.{ Executor, Executors }
+import java.util.concurrent.{ Executor }
 
 trait Executors extends AnyRef {
 

@@ -1,7 +1,7 @@
 package gv
 package isi
 
-import concurrent.{ Future }
+import scala.concurrent.{ Future }
 
 trait RepositoryPackage {
 

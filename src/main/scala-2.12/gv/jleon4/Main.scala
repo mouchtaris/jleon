@@ -126,9 +126,9 @@ object Main extends AnyRef
             val sink: Sink[ByteString, Future[Int]] = outs
               .convertTo[Sink[ByteBuffer, Future[Int]]]
               .convertTo[Sink[ByteString, Future[Int]]]
-              source(uri)
-                .alsoToMat(sink)(Keep.right)
-              .mapMaterializedValue(_.map( _ ⇒ Done)(isi.concurrent.Executors.SyncExecutor))
+            source(uri)
+              .alsoToMat(sink)(Keep.right)
+              .mapMaterializedValue(_.map(_ ⇒ Done)(isi.concurrent.Executors.SyncExecutor))
           }
           case fail @ LockResult.Locked(_, _) ⇒ Failure(fail)
           case fail @ LockResult.Failed(_)    ⇒ Failure(fail)

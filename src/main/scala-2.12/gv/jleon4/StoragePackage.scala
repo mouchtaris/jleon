@@ -1,6 +1,8 @@
 package gv
 package jleon4
 
+import language.{ implicitConversions }
+
 import isi.io.{ File }
 
 trait StoragePackage {
